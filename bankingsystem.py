@@ -1,13 +1,14 @@
 
 from crypt import methods
 from flask import Flask,render_template,url_for,redirect,flash
-from form import RegistrationForm,LoginForm
+from form import RegistrationForm,LoginForm,DepositForm
 app=Flask(__name__)
 
 app.config['SECRET_KEY']="436ef4721d03cc15224c24af0a6b2a4f"
 @app.route("/")
 @app.route("/transactions")
 def transactions():
+
     return render_template('transactions.html',title='Transactions')
 
 @app.route("/users")
@@ -32,6 +33,11 @@ def login():
         else:
             flash('Login unsuccessful, incorrect email or password', 'danger')
     return render_template('login.html', title='Login', form=form)
+
+@app.route("/deposit")
+def deposit():
+    form=DepositForm()
+    return render_template('deposit.html',title="Deposit",form=form)
 
 if __name__=='__main__':
     app.run(debug=True)

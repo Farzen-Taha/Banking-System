@@ -1,4 +1,32 @@
 {% extends "layout.html" %}
 {% block content %}
-<h1>Transactions Page</h1>
+<article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+          <h3>Deposit</h3>
+      </div>
+      <p class="article-content">Our pateners and customers show that we are trustwhorthy.</p>
+      <a class="mr-2" href="{{url_for('deposit')}}">Deposit Now</a>
+    </div>
+  </article>
+
+  <article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+          <h3>Withdraw</h3>
+      </div>
+      <p class="article-content">Your money will be everywhere with you.</p>
+      <a class="mr-2" href="#">Withdraw Now</a>
+    </div>
+  </article>
+
+  <article class="media content-section">
+    <div class="media-body">
+      <div class="article-metadata">
+          <h3>Transfer</h3>
+      </div>
+      <p class="article-content">Experience the fastest and most secured transfer system.</p>
+      <a class="mr-2" href="#">Transfer Now</a>
+    </div>
+  </article>
 {% endblock %}
