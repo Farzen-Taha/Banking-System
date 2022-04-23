@@ -1,7 +1,7 @@
 
 from crypt import methods
 from flask import Flask,render_template,url_for,redirect,flash
-from form import RegistrationForm,LoginForm,DepositForm
+from form import RegistrationForm,LoginForm,DepositForm, WithdrawForm,WithdrawForm
 app=Flask(__name__)
 
 app.config['SECRET_KEY']="436ef4721d03cc15224c24af0a6b2a4f"
@@ -29,7 +29,7 @@ def login():
     if form.validate_on_submit():
         if form.email.data=="admin@blog.com" and form.password.data=="password":
             flash('You loged in successfully','success')
-            return redirect(url_for('home'))
+            return redirect(url_for('users'))
         else:
             flash('Login unsuccessful, incorrect email or password', 'danger')
     return render_template('login.html', title='Login', form=form)
@@ -38,6 +38,11 @@ def login():
 def deposit():
     form=DepositForm()
     return render_template('deposit.html',title="Deposit",form=form)
+
+@app.route("/withdraw")
+def withdraw():
+    form=WithdrawForm()
+    return render_template('withdraw.html',title="Withdraw",form=form)
 
 if __name__=='__main__':
     app.run(debug=True)

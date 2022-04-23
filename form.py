@@ -23,3 +23,8 @@ class DepositForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Deposit')
 
+class WithdrawForm(FlaskForm):
+    amount=IntegerField("Amount",validators=[DataRequired()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Witdraw')
+
