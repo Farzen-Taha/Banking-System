@@ -1,3 +1,3 @@
-# from bankingsystem import app
-# if __name__=='__main__':
-#         app.run(debug=True)
+from bankingsystem import app
+if __name__=='__main__':
+        app.run(debug=True)

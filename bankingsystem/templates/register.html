@@ -65,7 +65,21 @@
                 {%endif%}
 
             </div>
+            <div class="form-group">
+                {{ form.account_type.label(class="form-control-label")}}
+                {% if form.account_type.errors %}
+                {{ form.account_type(class="form-control form-control-lg is-invalid")}}
+                <div class="invalid-feedback">
+                    {% for error in form.account_type.errors%}
+                    <span>{{error}}</span>
+                    {% endfor %}
+                </div>
 
+                {%else%}
+                {{form.account_type(class="form-select")}}
+                {%endif%}
+
+            </div>
 
         </fieldset>
         <div class="form-group mt-3">
