@@ -1,7 +1,7 @@
-import email
-from os import system
+
 from bankingsystem.models import SuperAdmin, SystemUser, Customer
 from flask import render_template, url_for, redirect, flash
+from flask_login import login_user, logout_user, current_user
 from bankingsystem.form import (
     RegistrationForm,
     LoginForm,
@@ -13,7 +13,12 @@ from bankingsystem.form import (
 from bankingsystem import app, db, bcrypt
 
 
+
 @app.route("/")
+@app.route("/home")
+def home():
+    return render_template("home.html", title="Home")
+
 @app.route("/transactions")
 def transactions():
 
@@ -27,7 +32,9 @@ def users():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-
+  
+    if current_user.is_authenticated:
+        return redirect(url_for('transactions'))
     form = RegistrationForm()
 
     if form.validate_on_submit():
@@ -42,6 +49,7 @@ def register():
                     email=form.email.data,
                     password=hashed_pw,
                 )
+                db.create_all()
                 db.session.add(super_admin)
                 db.session.commit()
                 flash("Your account has been created. You can log in now!", "success")
@@ -56,29 +64,69 @@ def register():
             system_user = SystemUser(
                 username=form.username.data, email=form.email.data, password=hashed_pw
             )
+            db.create_all()
+            db.session.add(system_user)
+            db.session.commit()
             flash(
                 "Your data saved. Please wait so that your account be verified.", "info"
             )
-        elif form.account_type.data == "SU":
-            Customer = Customer(
+            return redirect(url_for("login"))
+        elif form.account_type.data == "CU":
+            customer = Customer(
                 username=form.username.data, email=form.email.data, password=hashed_pw
             )
+            db.create_all()
+            db.session.add(customer)
+            db.session.commit()
             flash(
                 "Your data saved. Please wait so that your account be verified.", "info"
             )
+            return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
 
 
 @app.route("/login", methods=["POST", "GET"])
+
 def login():
+    if current_user.is_authenticated:
+        flash("Account authenticated", "success")
+        return redirect(url_for('home'))
     form = LoginForm()
     if form.validate_on_submit():
-        if form.email.data == "admin@blog.com" and form.password.data == "password":
-            flash("You loged in successfully", "success")
-            return redirect(url_for("users"))
-        else:
+        # if form.email.data == "admin@blog.com" and form.password.data == "password":
+        #     flash("You loged in successfully", "success")
+        #     return redirect(url_for("users"))
+        # else:
+        # SA = SuperAdmin.query.filter_by(email=form.email.data).first()
+        # SU = SystemUser.query.filter_by(email=form.email.data).first()
+        # CU = Customer.query.filter_by(email=form.email.data).first()
+
+        # if SA and bcrypt.check_password_hash(SA.password, form.password.data):
+        #     login_user(SA, remember=form.remember.data)
+        #     return redirect(url_for('admin'))
+        # elif SU and bcrypt.check_password_hash(SU.password, form.password.data):
+        #     login_user(SU, remember=form.remember.data)
+        #     return redirect(url_for('admin'))
+        # elif CU and bcrypt.check_password_hash(CU.password, form.password.data):
+        #     login_user(CU, remember=form.remember.data)
+        #     return redirect(url_for('users'))  
+        # else:    
+        #     flash("Login unsuccessful, incorrect email or password", "danger")
+      
+        CU = Customer.query.filter_by(email=form.email.data).first()
+        if CU and bcrypt.check_password_hash(CU.password, form.password.data):
+            login_user(CU, remember=form.remember.data)
+            
+            return redirect(url_for('users'))  
+        else:    
             flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
+
+@app.route("/logout")
+def logout():
+    logout_user()
+    return redirect(url_for('home'))  
+
 
 
 @app.route("/deposit")
@@ -97,3 +145,7 @@ def withdraw():
 def transfer():
     form = TransferForm()
     return render_template("transfer.html", title="Transfer", form=form)
+@app.route("/admin")
+def admin():
+    
+    return render_template("admin.html", title="Admin")

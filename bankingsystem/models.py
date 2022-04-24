@@ -1,5 +1,12 @@
-from bankingsystem import db
-class SuperAdmin(db.Model):
+from bankingsystem import db,login_manager
+from flask_login import UserMixin
+
+@login_manager.user_loader
+def load_user(user_id):
+    return Customer.query.get(int(user_id))
+
+class SuperAdmin(db.Model,UserMixin):
+
     id=db.Column(db.Integer, primary_key=True)
     username=db.Column(db.String(20),unique=True,nullable=False)
     email=db.Column(db.String(120),unique=True,nullable=False)
@@ -7,9 +14,13 @@ class SuperAdmin(db.Model):
     
     def __repr__(self) :
         return f"User ('{self.username}','{self.email}',Type=Admin)"
+    __mapper_args__ = {
+        'polymorphic_identity':'user',
+        'polymorphic_on':type
+    }
 
 
-class SystemUser(db.Model):
+class SystemUser(db.Model,UserMixin):
     id=db.Column(db.Integer, primary_key=True)
     username=db.Column(db.String(20),unique=True,nullable=False)
     email=db.Column(db.String(120),unique=True,nullable=False)
@@ -18,7 +29,7 @@ class SystemUser(db.Model):
         return f"User ('{self.username}','{self.email}',Type=System User)"
 
 
-class Customer(db.Model):
+class Customer(db.Model,UserMixin):
     id=db.Column(db.Integer, primary_key=True)
     username=db.Column(db.String(20),unique=True,nullable=False)
     email=db.Column(db.String(120),unique=True,nullable=False)
