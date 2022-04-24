@@ -24,7 +24,7 @@ class User(db.Model, UserMixin):
 class SuperAdmin(User):
     __tablename__ = "super_admin"
     __mapper_args__ = {"polymorphic_identity": "superadmin"}
-    id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True)
+    id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True,autoincrement=True)
 
 
 class SystemUser(User):
