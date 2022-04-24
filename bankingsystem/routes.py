@@ -97,29 +97,29 @@ def login():
         #     flash("You loged in successfully", "success")
         #     return redirect(url_for("users"))
         # else:
-        # SA = SuperAdmin.query.filter_by(email=form.email.data).first()
-        # SU = SystemUser.query.filter_by(email=form.email.data).first()
-        # CU = Customer.query.filter_by(email=form.email.data).first()
-
-        # if SA and bcrypt.check_password_hash(SA.password, form.password.data):
-        #     login_user(SA, remember=form.remember.data)
-        #     return redirect(url_for('admin'))
-        # elif SU and bcrypt.check_password_hash(SU.password, form.password.data):
-        #     login_user(SU, remember=form.remember.data)
-        #     return redirect(url_for('admin'))
-        # elif CU and bcrypt.check_password_hash(CU.password, form.password.data):
-        #     login_user(CU, remember=form.remember.data)
-        #     return redirect(url_for('users'))  
-        # else:    
-        #     flash("Login unsuccessful, incorrect email or password", "danger")
-      
+        SA = SuperAdmin.query.filter_by(email=form.email.data).first()
+        SU = SystemUser.query.filter_by(email=form.email.data).first()
         CU = Customer.query.filter_by(email=form.email.data).first()
-        if CU and bcrypt.check_password_hash(CU.password, form.password.data):
+
+        if SA and bcrypt.check_password_hash(SA.password, form.password.data):
+            login_user(SA, remember=form.remember.data)
+            return redirect(url_for('admin'))
+        elif SU and bcrypt.check_password_hash(SU.password, form.password.data):
+            login_user(SU, remember=form.remember.data)
+            return redirect(url_for('admin'))
+        elif CU and bcrypt.check_password_hash(CU.password, form.password.data):
             login_user(CU, remember=form.remember.data)
-            
             return redirect(url_for('users'))  
         else:    
             flash("Login unsuccessful, incorrect email or password", "danger")
+      
+        # CU = Customer.query.filter_by(email=form.email.data).first()
+        # if CU and bcrypt.check_password_hash(CU.password, form.password.data):
+        #     login_user(CU, remember=form.remember.data)
+            
+        #     return redirect(url_for('users'))  
+        # else:    
+        #     flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
 
 @app.route("/logout")
