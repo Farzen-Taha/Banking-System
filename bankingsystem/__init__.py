@@ -15,15 +15,15 @@ bcrypt=Bcrypt(app)
 login_manager=LoginManager(app)
 
 
-# from bankingsystem.models import SystemUser
-# admin=Admin(app,template_mode='bootstrap4')
+from bankingsystem.models import SystemUser
+admin=Admin(app,template_mode='bootstrap4')
 
-# class NotificationsView(BaseView):
-#     @expose('/')
-#     def notification(self):
-#         return self.render('admin/notification.html')
+class NotificationsView(BaseView):
+    @expose('/')
+    def notification(self):
+        return self.render('admin/notification.html')
    
 
-# admin.add_view(ModelView(SystemUser,db.session))
-# admin.add_view(NotificationsView(name='Notifications',endpoint='notification'))
+admin.add_view(ModelView(SystemUser,db.session))
+admin.add_view(NotificationsView(name='Notifications',endpoint='notification'))
 from bankingsystem import routes
