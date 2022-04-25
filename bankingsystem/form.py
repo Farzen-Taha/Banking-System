@@ -32,6 +32,7 @@ class RegistrationForm(FlaskForm):
         if SA or SU or CU:
             raise ValidationError(
                 'That email is taken. Please choose a different one.')
+    
 
 class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])

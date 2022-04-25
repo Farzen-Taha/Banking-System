@@ -1,6 +1,6 @@
 from bankingsystem.models import SuperAdmin, SystemUser, Customer
-from flask import render_template, url_for, redirect, flash
-from flask_login import login_user, logout_user, current_user
+from flask import render_template, url_for, redirect, flash,request
+from flask_login import login_required, login_user, logout_user, current_user
 from bankingsystem.form import (
     RegistrationForm,
     LoginForm,
@@ -38,7 +38,6 @@ def register():
 
     if form.validate_on_submit():
         hashed_pw = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
-
         if form.account_type.data == "SA":
             super_admin = SuperAdmin.query.first()
             # if there is not a super admin create one
@@ -46,7 +45,7 @@ def register():
                 super_admin = SuperAdmin(
                     username=form.username.data,
                     email=form.email.data,
-                    password=hashed_pw
+                    password=hashed_pw,
                 )
                 flash(
                     super_admin.username
@@ -69,9 +68,13 @@ def register():
                 )
         elif form.account_type.data == "SU":
             system_user = SystemUser(
-                username=form.username.data, email=form.email.data, password=hashed_pw
+                username=form.username.data,
+                email=form.email.data,
+                password=hashed_pw,
+                
             )
             db.create_all()
+
             db.session.add(system_user)
             db.session.commit()
             flash(
@@ -80,8 +83,11 @@ def register():
             return redirect(url_for("login"))
         elif form.account_type.data == "CU":
             customer = Customer(
-                username=form.username.data, email=form.email.data, password=hashed_pw
+                username=form.username.data, 
+                email=form.email.data, 
+                password=hashed_pw,
             )
+
             db.create_all()
             db.session.add(customer)
             db.session.commit()
@@ -105,13 +111,16 @@ def login():
 
         if SA and bcrypt.check_password_hash(SA.password, form.password.data):
             login_user(SA, remember=form.remember.data)
-            return redirect(url_for("admin"))
+            next_page = request.args.get('next')
+            return  redirect(next_page) if next_page else redirect(url_for("admin"))
         elif SU and bcrypt.check_password_hash(SU.password, form.password.data):
             login_user(SU, remember=form.remember.data)
-            return redirect(url_for("admin"))
+            next_page = request.args.get('next')
+            return  redirect(next_page) if next_page else redirect(url_for("admin"))
         elif CU and bcrypt.check_password_hash(CU.password, form.password.data):
             login_user(CU, remember=form.remember.data)
-            return redirect(url_for("users"))
+            next_page = request.args.get('next')
+            return  redirect(next_page) if next_page else redirect(url_for("users"))
         else:
             flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
@@ -120,7 +129,7 @@ def login():
 @app.route("/logout")
 def logout():
     logout_user()
-    return redirect(url_for("home"))
+    return redirect(url_for("login"))
 
 
 @app.route("/deposit")
@@ -145,3 +154,8 @@ def transfer():
 def admin():
 
     return render_template("admin.html", title="Admin")
+
+@app.route("/account")
+@login_required
+def account():
+    return render_template("account.html", title="Account")

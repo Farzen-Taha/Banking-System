@@ -1,10 +1,10 @@
-from flask import Flask
+from flask import Flask,url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_admin import Admin,BaseView,expose
 from flask_admin.contrib.sqla import ModelView
-
+from flask_admin.menu import MenuLink
 
 app=Flask(__name__)
 app.config['SECRET_KEY']="436ef4721d03cc15224c24af0a6b2a4f"
@@ -13,19 +13,67 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 db = SQLAlchemy(app)
 bcrypt=Bcrypt(app)
 login_manager=LoginManager(app)
-
-
+login_manager.login_view='login'
+login_manager.login_message_category='info'
 from bankingsystem.models import Customer, SuperAdmin, SystemUser
 admin=Admin(app,template_mode='bootstrap4')
 
 class NotificationsView(BaseView):
     @expose('/')
     def notification(self):
-        return self.render('admin/notification.html')
-   
+        name='jkdfsjd'
+        return self.render('admin/notification.html',name=name)
 
-admin.add_view(ModelView(SystemUser,db.session))
-admin.add_view(ModelView(Customer,db.session))
-admin.add_view(ModelView(SuperAdmin,db.session))
+
+class CreateCustomerView(ModelView):   
+    form_widget_args = {
+        'user_type':{
+            'readonly': True
+            
+        }
+    }
+    form_args = {
+    'user_type': {
+        'render_kw': {
+                'value':'customer'
+            },
+    }
+}
+class CreateSuperAdminView(ModelView):   
+    form_widget_args = {
+        'user_type':{
+            'readonly': True
+        }
+    }
+    form_args = {
+    'user_type': {
+        'render_kw': {
+                'value':'superadmin'
+            },
+    }
+}
+class CreateSystemUserView(ModelView):   
+    form_widget_args = {
+        'user_type':{
+            'readonly': True
+            
+        }
+    }
+    form_args = {
+    'user_type': {
+        'render_kw': {
+                'placeholder': 'Enter name',
+                'value':'systemuser'
+            },
+    }
+}   
+# class MainIndexLink(MenuLink):
+#         def get_url(self):
+#             return url_for('')
+
+admin.add_view(CreateSuperAdminView(SuperAdmin,db.session))
+admin.add_view(CreateSystemUserView(SystemUser,db.session))
+admin.add_view(CreateCustomerView(Customer,db.session))
 admin.add_view(NotificationsView(name='Notifications',endpoint='notification'))
+# admin.add_link(MenuLink(name='logout'))
 from bankingsystem import routes
