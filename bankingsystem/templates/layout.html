@@ -30,7 +30,7 @@
         </button>
         <div class="collapse navbar-collapse d-flex justify-content-between" id="navbarToggle">
           <div class="navbar-nav mr-auto">
-            {% if current_user.is_authenticated%}
+            {% if current_user.is_authenticated and current_user.user_type=='customer'%}
             <a class="nav-item nav-link" href="{{url_for('transactions')}}">Transactions</a>
             {%endif%}
           </div>

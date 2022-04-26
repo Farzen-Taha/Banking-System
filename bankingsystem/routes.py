@@ -153,12 +153,6 @@ def transfer():
     form = TransferForm()
     return render_template("transfer.html", title="Transfer", form=form)
 
-
-# @app.route("/admin")
-# @login_required
-# def admin():
-#     return render_template("admin.html", title="Admin")
-
 @app.route("/account")
 @login_required
 def account():

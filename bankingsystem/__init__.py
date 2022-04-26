@@ -25,8 +25,7 @@ admin=Admin(app,template_mode='bootstrap4',index_view=MyAdminIndexView())
 class NotificationsView(BaseView):
     @expose('/')
     def notification(self):
-        name='jkdfsjd'
-        return self.render('admin/notification.html',name=name)
+        return self.render('admin/notification.html')
 
 
 class CreateCustomerView(ModelView):   
