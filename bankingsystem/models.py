@@ -1,3 +1,4 @@
+from email.policy import default
 from bankingsystem import db, login_manager
 from flask_login import UserMixin
 from sqlalchemy import event
@@ -16,8 +17,8 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password = db.Column(db.String(60), nullable=False)
-    # salt = db.Column(db.Binary, default=lambda: os.urandom(512))
     user_type = db.Column("type", db.String(50))
+    image_file=db.Column(db.String(60), nullable=False, default='default.jpg')
     __mapper_args__ = {"polymorphic_on": user_type}
 
     def __repr__(self):

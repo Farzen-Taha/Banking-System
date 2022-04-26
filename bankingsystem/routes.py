@@ -1,3 +1,4 @@
+from fileinput import filename
 from bankingsystem.models import SuperAdmin, SystemUser, Customer
 from flask import render_template, url_for, redirect, flash,request
 from flask_login import login_required, login_user, logout_user, current_user
@@ -8,10 +9,12 @@ from bankingsystem.form import (
     TransferForm,
     WithdrawForm,
     WithdrawForm,
+    UpdatAccountForm
 )
 from bankingsystem import app, db, bcrypt
-
-
+import secrets
+import os
+from PIL import Image
 @app.route("/")
 @app.route("/home")
 def home():
@@ -153,7 +156,37 @@ def transfer():
     form = TransferForm()
     return render_template("transfer.html", title="Transfer", form=form)
 
-@app.route("/account")
+
+
+def save_picture(form_picture):
+    random_hex = secrets.token_hex(8)
+    _, f_ext = os.path.splitext(form_picture.filename)
+    picture_fn = random_hex+f_ext
+    picture_path = os.path.join(
+        app.root_path, 'static/profile_pic', picture_fn)
+    output_size = (125, 125)
+    i = Image.open(form_picture)
+    i.thumbnail(output_size)
+
+    i.save(picture_path)
+    return picture_fn
+
+@app.route("/account",methods=["POST", "GET"])
 @login_required
 def account():
-    return render_template("account.html", title="Account")
+
+    form = UpdatAccountForm()
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Your account has updated succesfully!', 'success')
+        return redirect(url_for('account'))
+    elif request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    image_file=url_for('static',filename='profile_pic/'+current_user.image_file)
+    return render_template("account.html", title="Account",form=form,image_file=image_file)
