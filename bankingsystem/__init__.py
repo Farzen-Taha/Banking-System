@@ -27,8 +27,33 @@ class NotificationsView(BaseView):
     def notification(self):
         return self.render('admin/notification.html')
 
+class LogoutMenueLink(MenuLink):
+    def is_accessible(self):
+        return current_user.is_authenticated
 
-class CreateCustomerView(ModelView):   
+
+
+class SuperAdminView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.user_type=='superadmin'
+
+    form_widget_args = {
+        'user_type':{
+            'readonly': True
+        }
+    }
+    form_args = {
+    'user_type': {
+        'render_kw': {
+                'value':'superadmin'
+            },
+    }
+}
+
+class CustomerView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and (current_user.user_type=='superadmin' or current_user.user_type=='systemuser')
+
     form_widget_args = {
         'user_type':{
             'readonly': True
@@ -42,20 +67,9 @@ class CreateCustomerView(ModelView):
             },
     }
 }
-class CreateSuperAdminView(ModelView):   
-    form_widget_args = {
-        'user_type':{
-            'readonly': True
-        }
-    }
-    form_args = {
-    'user_type': {
-        'render_kw': {
-                'value':'superadmin'
-            },
-    }
-}
-class CreateSystemUserView(ModelView):   
+class SystemUserView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and (current_user.user_type=='superadmin' or current_user.user_type=='systemuser')
     form_widget_args = {
         'user_type':{
             'readonly': True
@@ -69,22 +83,11 @@ class CreateSystemUserView(ModelView):
                 'value':'systemuser'
             },
     }
-}   
-
-class LogoutMenueLink(MenuLink):
-    def is_accessible(self):
-        return current_user.is_authenticated
-
-
-
-class MySuperAdminView(ModelView):
-    def is_accessible(self):
-        return current_user.is_authenticated and current_user.user_type=='superadmin'
-
+} 
 admin.add_link(LogoutMenueLink(name='logout',category='',url='/logout'))
-admin.add_view(MySuperAdminView(SuperAdmin,db.session))
-admin.add_view(CreateSystemUserView(SystemUser,db.session))
-admin.add_view(CreateCustomerView(Customer,db.session))
+admin.add_view(SuperAdminView(SuperAdmin,db.session))
+admin.add_view(SystemUserView(SystemUser,db.session))
+admin.add_view(CustomerView(Customer,db.session))
 admin.add_view(NotificationsView(name='Notifications',endpoint='notification'))
 # 
 

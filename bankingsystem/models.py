@@ -2,10 +2,10 @@ from email.policy import default
 from bankingsystem import db, login_manager
 from flask_login import UserMixin
 from sqlalchemy import event
-
 from werkzeug.security import generate_password_hash
 from sqlalchemy.ext.hybrid import hybrid_property
 from bankingsystem import bcrypt
+# from itsdangerous import TimedJSONWebSignatureSerializer as serializer
 import os
 @login_manager.user_loader
 def load_user(user_id):
@@ -21,9 +21,7 @@ class User(db.Model, UserMixin):
     image_file=db.Column(db.String(60), nullable=False, default='default.jpg')
     __mapper_args__ = {"polymorphic_on": user_type}
 
-    def __repr__(self):
-        return f"User ('{self.username}','{self.email}',Type=Admin)"
-    
+ 
     # def compute_password_hash(new_Value):
     #     hashed_pw = bcrypt.generate_password_hash(new_Value).decode("utf-8")
     #     return hashed_pw

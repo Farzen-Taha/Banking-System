@@ -1,7 +1,8 @@
 from fileinput import filename
 from bankingsystem.models import SuperAdmin, SystemUser, Customer
-from flask import render_template, url_for, redirect, flash,request
+from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_required, login_user, logout_user, current_user
+from functools import wraps
 from bankingsystem.form import (
     RegistrationForm,
     LoginForm,
@@ -9,7 +10,7 @@ from bankingsystem.form import (
     TransferForm,
     WithdrawForm,
     WithdrawForm,
-    UpdatAccountForm
+    UpdatAccountForm,
 )
 from bankingsystem import app, db, bcrypt
 import secrets
@@ -50,14 +51,6 @@ def register():
                     email=form.email.data,
                     password=hashed_pw,
                 )
-                flash(
-                    super_admin.username
-                    + " "
-                    + super_admin.email
-                    + " "
-                    + super_admin.password,
-                    "success",
-                )
                 db.create_all()
                 db.session.add(super_admin)
                 db.session.commit()
@@ -74,7 +67,6 @@ def register():
                 username=form.username.data,
                 email=form.email.data,
                 password=hashed_pw,
-                
             )
             db.create_all()
 
@@ -86,8 +78,8 @@ def register():
             return redirect(url_for("login"))
         elif form.account_type.data == "CU":
             customer = Customer(
-                username=form.username.data, 
-                email=form.email.data, 
+                username=form.username.data,
+                email=form.email.data,
                 password=hashed_pw,
             )
 
@@ -114,16 +106,20 @@ def login():
 
         if SA and bcrypt.check_password_hash(SA.password, form.password.data):
             login_user(SA, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return  redirect(next_page) if next_page else redirect(url_for("admin.index"))
+            next_page = request.args.get("next")
+            return (
+                redirect(next_page) if next_page else redirect(url_for("admin.index"))
+            )
         elif SU and bcrypt.check_password_hash(SU.password, form.password.data):
             login_user(SU, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return  redirect(next_page) if next_page else redirect(url_for("admin.index"))
+            next_page = request.args.get("next")
+            return (
+                redirect(next_page) if next_page else redirect(url_for("admin.index"))
+            )
         elif CU and bcrypt.check_password_hash(CU.password, form.password.data):
             login_user(CU, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return  redirect(next_page) if next_page else redirect(url_for("users"))
+            next_page = request.args.get("next")
+            return redirect(next_page) if next_page else redirect(url_for("users"))
         else:
             flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
@@ -157,13 +153,11 @@ def transfer():
     return render_template("transfer.html", title="Transfer", form=form)
 
 
-
 def save_picture(form_picture):
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex+f_ext
-    picture_path = os.path.join(
-        app.root_path, 'static/profile_pic', picture_fn)
+    picture_fn = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, "static/profile_pic", picture_fn)
     output_size = (125, 125)
     i = Image.open(form_picture)
     i.thumbnail(output_size)
@@ -171,7 +165,8 @@ def save_picture(form_picture):
     i.save(picture_path)
     return picture_fn
 
-@app.route("/account",methods=["POST", "GET"])
+
+@app.route("/account", methods=["POST", "GET"])
 @login_required
 def account():
 
@@ -183,10 +178,12 @@ def account():
         current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
-        flash('Your account has updated succesfully!', 'success')
-        return redirect(url_for('account'))
-    elif request.method == 'GET':
+        flash("Your account has updated succesfully!", "success")
+        return redirect(url_for("account"))
+    elif request.method == "GET":
         form.username.data = current_user.username
         form.email.data = current_user.email
-    image_file=url_for('static',filename='profile_pic/'+current_user.image_file)
-    return render_template("account.html", title="Account",form=form,image_file=image_file)
+    image_file = url_for("static", filename="profile_pic/" + current_user.image_file)
+    return render_template(
+        "account.html", title="Account", form=form, image_file=image_file
+    )
