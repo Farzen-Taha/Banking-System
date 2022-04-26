@@ -19,8 +19,8 @@ def home():
 
 
 @app.route("/transactions")
+@login_required
 def transactions():
-
     return render_template("transactions.html", title="Transactions")
 
 
@@ -112,11 +112,11 @@ def login():
         if SA and bcrypt.check_password_hash(SA.password, form.password.data):
             login_user(SA, remember=form.remember.data)
             next_page = request.args.get('next')
-            return  redirect(next_page) if next_page else redirect(url_for("admin"))
+            return  redirect(next_page) if next_page else redirect(url_for("admin.index"))
         elif SU and bcrypt.check_password_hash(SU.password, form.password.data):
             login_user(SU, remember=form.remember.data)
             next_page = request.args.get('next')
-            return  redirect(next_page) if next_page else redirect(url_for("admin"))
+            return  redirect(next_page) if next_page else redirect(url_for("admin.index"))
         elif CU and bcrypt.check_password_hash(CU.password, form.password.data):
             login_user(CU, remember=form.remember.data)
             next_page = request.args.get('next')
@@ -127,33 +127,37 @@ def login():
 
 
 @app.route("/logout")
+@login_required
 def logout():
     logout_user()
     return redirect(url_for("login"))
 
 
 @app.route("/deposit")
+@login_required
 def deposit():
     form = DepositForm()
     return render_template("deposit.html", title="Deposit", form=form)
 
 
 @app.route("/withdraw")
+@login_required
 def withdraw():
     form = WithdrawForm()
     return render_template("withdraw.html", title="Withdraw", form=form)
 
 
 @app.route("/transfer")
+@login_required
 def transfer():
     form = TransferForm()
     return render_template("transfer.html", title="Transfer", form=form)
 
 
-@app.route("/admin")
-def admin():
-
-    return render_template("admin.html", title="Admin")
+# @app.route("/admin")
+# @login_required
+# def admin():
+#     return render_template("admin.html", title="Admin")
 
 @app.route("/account")
 @login_required

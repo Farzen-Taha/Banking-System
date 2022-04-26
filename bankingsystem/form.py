@@ -1,7 +1,7 @@
 
 from flask_wtf import FlaskForm
 from wtforms import SelectField,IntegerField, StringField, PasswordField, SubmitField, BooleanField,ValidationError
-from wtforms.validators import DataRequired, Length, EqualTo,Email
+from wtforms.validators import DataRequired, Length, EqualTo,Email,ValidationError
 from bankingsystem.models import SuperAdmin,SystemUser,Customer
 
 class RegistrationForm(FlaskForm):
@@ -19,16 +19,16 @@ class RegistrationForm(FlaskForm):
 
     def validate_username(self, username):
         SA = SuperAdmin.query.filter_by(username=username.data).first()
-        SU=SuperAdmin.query.filter_by(username=username.data).first()
-        CU=SuperAdmin.query.filter_by(username=username.data).first()
+        SU=SystemUser.query.filter_by(username=username.data).first()
+        CU=Customer.query.filter_by(username=username.data).first()
         if SA or SU or CU:
             raise ValidationError(
                 'That name is taken. Please choose a different one.')
 
     def validate_email(self, email):
         SA = SuperAdmin.query.filter_by(email=email.data).first()
-        SU = SuperAdmin.query.filter_by(email=email.data).first()
-        CU = SuperAdmin.query.filter_by(email=email.data).first()
+        SU = SystemUser.query.filter_by(email=email.data).first()
+        CU = Customer.query.filter_by(email=email.data).first()
         if SA or SU or CU:
             raise ValidationError(
                 'That email is taken. Please choose a different one.')

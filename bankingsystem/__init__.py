@@ -1,8 +1,8 @@
 from flask import Flask,url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
-from flask_login import LoginManager
-from flask_admin import Admin,BaseView,expose
+from flask_login import LoginManager, current_user
+from flask_admin import Admin,BaseView,expose,AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
 
@@ -16,7 +16,11 @@ login_manager=LoginManager(app)
 login_manager.login_view='login'
 login_manager.login_message_category='info'
 from bankingsystem.models import Customer, SuperAdmin, SystemUser
-admin=Admin(app,template_mode='bootstrap4')
+
+class MyAdminIndexView(AdminIndexView):
+    def is_accessible(self):
+        return current_user.is_authenticated and (current_user.user_type=='superadmin' or current_user.user_type=='systemuser')
+admin=Admin(app,template_mode='bootstrap4',index_view=MyAdminIndexView())
 
 class NotificationsView(BaseView):
     @expose('/')
@@ -67,13 +71,23 @@ class CreateSystemUserView(ModelView):
             },
     }
 }   
-# class MainIndexLink(MenuLink):
-#         def get_url(self):
-#             return url_for('')
 
-admin.add_view(CreateSuperAdminView(SuperAdmin,db.session))
+class LogoutMenueLink(MenuLink):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+
+
+class MySuperAdminView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.user_type=='superadmin'
+
+admin.add_link(LogoutMenueLink(name='logout',category='',url='/logout'))
+admin.add_view(MySuperAdminView(SuperAdmin,db.session))
 admin.add_view(CreateSystemUserView(SystemUser,db.session))
 admin.add_view(CreateCustomerView(Customer,db.session))
 admin.add_view(NotificationsView(name='Notifications',endpoint='notification'))
-# admin.add_link(MenuLink(name='logout'))
+# 
+
+
 from bankingsystem import routes
