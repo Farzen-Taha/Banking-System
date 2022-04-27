@@ -171,10 +171,25 @@ def withdraw():
     return render_template("withdraw.html", title="Withdraw", form=form)
 
 
-@app.route("/transfer")
+@app.route("/transfer",methods=["POST", "GET"])
 @login_required
 def transfer():
     form = TransferForm()
+    if request.method=="POST":
+            if bcrypt.check_password_hash(current_user.password, form.password.data) and form.amount.data>0:
+                sender_customer=Customer.query.filter_by(id=current_user.id).first()
+                
+                receiver_customer=Customer.query.filter_by(account_number=form.account_number.data).first()
+                if current_user.balance>=form.amount.data:
+                    sender_customer.balance-=int(form.amount.data)
+                    receiver_customer.balance+=int (form.amount.data)
+                    db.session.commit()
+                    flash('Transfer was successful!','info')
+                    return redirect(url_for('transfer'))
+                else:
+                    flash('Insufficient Funds to transfer!','warning')
+            else:
+                flash('Wrong password or Amount!','danger')
     return render_template("transfer.html", title="Transfer", form=form)
 
 
