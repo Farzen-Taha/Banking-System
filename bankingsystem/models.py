@@ -54,3 +54,8 @@ class Customer(User):
     id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True)
     balance = db.Column(db.Integer,default=0)
     account_number = db.Column("account_number",db.Integer)
+
+class Requests(db.Model,User):
+    __tablename__ = "requests"
+    __mapper_args__ = {"polymorphic_identity": "request"}
+    id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True)

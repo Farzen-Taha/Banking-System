@@ -1,5 +1,5 @@
 from fileinput import filename
-from bankingsystem.models import SuperAdmin, SystemUser, Customer
+from bankingsystem.models import SuperAdmin, SystemUser, Customer,Requests
 from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_required, login_user, logout_user, current_user
 from functools import wraps
@@ -83,19 +83,26 @@ def register():
             range_start = 10**(n -1)
             range_end = (10**n )-1
             account_number= randint(range_start, range_end)
-            customer = Customer(
+            # customer = Customer(
+            #     username=form.username.data,
+            #     email=form.email.data,
+            #     password=hashed_pw,
+            #     account_number=account_number
+            # )
+            requests = Requests(
                 username=form.username.data,
                 email=form.email.data,
                 password=hashed_pw,
                 account_number=account_number
             )
-
+            # Requests.query.add(Requests)
             db.create_all()
-            db.session.add(customer)
+            db.session.add(requests)
             db.session.commit()
             flash(
                 "Your account was created. Wait for admin's approval!", "info"
             )
+
             return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
 
@@ -227,3 +234,8 @@ def account():
     return render_template(
         "account.html", title="Account", form=form, image_file=image_file
     )
+@app.route("/admin/notification/requests", methods=["POST", "GET"])
+@login_required
+def account_request():
+
+    return render_template("admin/account_request.html", title="Request")
