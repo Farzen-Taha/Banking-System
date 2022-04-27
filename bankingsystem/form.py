@@ -54,7 +54,7 @@ class WithdrawForm(FlaskForm):
 
 class TransferForm(FlaskForm):
     amount=IntegerField("Amount",validators=[DataRequired()])
-    account_number=IntegerField("Account Number",validators=[DataRequired()])
+    account_number=IntegerField("Reciever's Account Number",validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Transfer')
 

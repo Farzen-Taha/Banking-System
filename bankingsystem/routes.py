@@ -3,6 +3,7 @@ from bankingsystem.models import SuperAdmin, SystemUser, Customer
 from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_required, login_user, logout_user, current_user
 from functools import wraps
+from random import randint
 from bankingsystem.form import (
     RegistrationForm,
     LoginForm,
@@ -16,6 +17,7 @@ from bankingsystem import app, db, bcrypt
 import secrets
 import os
 from PIL import Image
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -77,17 +79,22 @@ def register():
             )
             return redirect(url_for("login"))
         elif form.account_type.data == "CU":
+            n = 10
+            range_start = 10**(n -1)
+            range_end = (10**n )-1
+            account_number= randint(range_start, range_end)
             customer = Customer(
                 username=form.username.data,
                 email=form.email.data,
                 password=hashed_pw,
+                account_number=account_number
             )
 
             db.create_all()
             db.session.add(customer)
             db.session.commit()
             flash(
-                "Your data saved. Please wait so that your account be verified.", "info"
+                "Your account was created. Wait for admin's approval!", "info"
             )
             return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
@@ -96,7 +103,6 @@ def register():
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if current_user.is_authenticated:
-        flash("Account authenticated", "success")
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():
@@ -132,17 +138,36 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/deposit")
+@app.route("/deposit",methods=["POST", "GET"],)
 @login_required
 def deposit():
     form = DepositForm()
+    if request.method=="POST":
+        if bcrypt.check_password_hash(current_user.password, form.password.data) and form.amount.data>0:
+            user=Customer.query.filter_by(id=current_user.id).first()
+            user.balance=user.balance+int(form.amount.data)
+            db.session.commit()
+            flash('Deposit was successful!','info')
+        else:
+            flash('Wrong password or Amount!','danger')
     return render_template("deposit.html", title="Deposit", form=form)
 
 
-@app.route("/withdraw")
+@app.route("/withdraw",methods=["POST", "GET"])
 @login_required
 def withdraw():
     form = WithdrawForm()
+    if request.method=="POST":
+            if bcrypt.check_password_hash(current_user.password, form.password.data) and form.amount.data>0:
+                user=Customer.query.filter_by(id=current_user.id).first()
+                if current_user.balance>=form.amount.data:
+                    user.balance-=int(form.amount.data)
+                    db.session.commit()
+                    flash('Withdrawl was successful!','info')
+                else:
+                    flash('Insufficient Funds to withdraw','warning')
+            else:
+                flash('Wrong password or Amount!','danger')
     return render_template("withdraw.html", title="Withdraw", form=form)
 
 
