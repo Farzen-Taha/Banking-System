@@ -1,64 +1,24 @@
 {% extends "layout.html" %}
 {% block content %}
-<!-- <article class="media content-section">
-    <img class="rounded-circle article-img" src="../../static/profile_pic/default.jpg">
-    <div class="media-body">
-      <div class="article-metadata">
-          <span> '---'  </span>
-        <small class="text-muted">time</small>
-      </div>
-      <h4 class="article-title">Name </h4>
-      <p class="article-content">Email</p>
-      <div>
-        <a class="btn btn-success btn-sm mt-1 mb-1" href="#">Accept</a>
-        <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Reject</button>
-      </div>
-    </div>
-  </article>
-  </div> -->
 
-<div class="row row-cols-1 row-cols-md-3 g-4">
-    <div class="col">
-        <div class="card">
-            <img src="../../static/profile_pic/default.jpg" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h5 class="card-title">Super Admin</h5>
-                <p class="card-text">Name is here.</p>
-                <p class="card-text">Email is here.</p>
-            </div>
-            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                <button type="button" class="btn btn-success">Accept</button>
-                <button type="button" class="btn btn-danger">Reject</button>
-            </div>
-        </div>
-    </div>
-    <div class="col">
-        <div class="card">
-            <img src="../../static/profile_pic/default.jpg" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h5 class="card-title">System User</h5>
-                <p class="card-text">Name is here.</p>
-                <p class="card-text">Email is here.</p>
-            </div>
-            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                <button type="button" class="btn btn-success">Accept</button>
-                <button type="button" class="btn btn-danger">Reject</button>
+<div class="container">
+    <div class="row row-cols-5 ">
+        {%for request in requests%}
+        <div class="col">
+            <div class="card">
+                <img src="../../static/profile_pic/default.jpg" class="card-img-top" alt="...">
+                <div class="card-body">
+                    <h5 class="card-title">{{request.user_type}}</h5>
+                    <p class="card-text">{{request.username}}</p>
+                    <p class="card-text">{{request.email}}</p>
+                </div>
+                <div class="btn-group" role="group" aria-label="Basic mixed styles example">
+                    <a class="btn btn-success" href="{{url_for('accept_account_request',id=request.id)}}">Accept</a>
+                    <a class="btn btn-danger" href="{{url_for('reject_account_request',id=request.id)}}">Reject</a>
+                </div>
             </div>
         </div>
-    </div>
-    <div class="col">
-        <div class="card">
-            <img src="../../static/profile_pic/default.jpg" class="card-img-top" alt="...">
-            <div class="card-body">
-                <h5 class="card-title">Customer</h5>
-                <p class="card-text">Name is here.</p>
-                <p class="card-text">Email is here.</p>
-            </div>
-            <div class="btn-group" role="group" aria-label="Basic mixed styles example">
-                <button type="button" class="btn btn-success">Accept</button>
-                <button type="button" class="btn btn-danger">Reject</button>
-            </div>
-        </div>
+        {%endfor%}
     </div>
 </div>
 {% endblock content %}

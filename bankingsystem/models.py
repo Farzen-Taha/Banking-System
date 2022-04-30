@@ -55,7 +55,16 @@ class Customer(User):
     balance = db.Column(db.Integer,default=0)
     account_number = db.Column("account_number",db.Integer)
 
-class Requests(db.Model,User):
+class Requests(db.Model):
     __tablename__ = "requests"
-    __mapper_args__ = {"polymorphic_identity": "request"}
-    id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True)
+    # __mapper_args__ = {"polymorphic_identity": "request"}
+    id = db.Column("id", db.Integer, primary_key=True)
+    username = db.Column(db.String(20), unique=True, nullable=False)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password = db.Column(db.String(60), nullable=False)
+    user_type = db.Column("type", db.String(50))
+    image_file=db.Column(db.String(60), nullable=False, default='default.jpg')
+    account_number = db.Column("account_number",db.Integer)
+
+    # def __repr__(self):
+    #     return f"Requests('{self.username}','{self.email}','{self.user_type}','{self.image_file}')"

@@ -1,5 +1,7 @@
 from fileinput import filename
-from bankingsystem.models import SuperAdmin, SystemUser, Customer,Requests
+
+from sqlalchemy import delete, null
+from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests
 from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_required, login_user, logout_user, current_user
 from functools import wraps
@@ -17,6 +19,7 @@ from bankingsystem import app, db, bcrypt
 import secrets
 import os
 from PIL import Image
+
 
 @app.route("/")
 @app.route("/home")
@@ -60,19 +63,38 @@ def register():
                 return redirect(url_for("login"))
             # else send a reques to the existing super admin
             else:
+                request = Requests(
+                    username=form.username.data,
+                    email=form.email.data,
+                    password=hashed_pw,
+                    user_type="systemuser",
+                )
                 flash(
                     "There is already a Super Admin account. Please wait so that your account be verified.",
                     "warning",
                 )
+                db.create_all()
+                db.session.add(request)
+                db.session.commit()
+
         elif form.account_type.data == "SU":
-            system_user = SystemUser(
+            # system_user = SystemUser(
+            #     username=form.username.data,
+            #     email=form.email.data,
+            #     password=hashed_pw,
+            # )
+            # db.create_all()
+
+            # db.session.add(system_user)
+            # db.session.commit()
+            account_request = Requests(
                 username=form.username.data,
                 email=form.email.data,
                 password=hashed_pw,
+                user_type="systemuser",
             )
             db.create_all()
-
-            db.session.add(system_user)
+            db.session.add(account_request)
             db.session.commit()
             flash(
                 "Your data saved. Please wait so that your account be verified.", "info"
@@ -80,29 +102,27 @@ def register():
             return redirect(url_for("login"))
         elif form.account_type.data == "CU":
             n = 10
-            range_start = 10**(n -1)
-            range_end = (10**n )-1
-            account_number= randint(range_start, range_end)
+            range_start = 10 ** (n - 1)
+            range_end = (10**n) - 1
+            account_number = randint(range_start, range_end)
             # customer = Customer(
             #     username=form.username.data,
             #     email=form.email.data,
             #     password=hashed_pw,
-            #     account_number=account_number
+            #     account_number=account_number,
             # )
-            requests = Requests(
+            account_request = Requests(
                 username=form.username.data,
                 email=form.email.data,
                 password=hashed_pw,
-                account_number=account_number
+                account_number=account_number,
+                user_type="customer",
             )
-            # Requests.query.add(Requests)
             db.create_all()
-            db.session.add(requests)
+            # db.session.add(customer)
+            db.session.add(account_request)
             db.session.commit()
-            flash(
-                "Your account was created. Wait for admin's approval!", "info"
-            )
-
+            flash("Your account was created. Wait for admin's approval!", "info")
             return redirect(url_for("login"))
     return render_template("register.html", title="Register", form=form)
 
@@ -145,58 +165,69 @@ def logout():
     return redirect(url_for("login"))
 
 
-@app.route("/deposit",methods=["POST", "GET"],)
+@app.route("/deposit", methods=["POST", "GET"])
 @login_required
 def deposit():
     form = DepositForm()
-    if request.method=="POST":
-        if bcrypt.check_password_hash(current_user.password, form.password.data) and form.amount.data>0:
-            user=Customer.query.filter_by(id=current_user.id).first()
-            user.balance=user.balance+int(form.amount.data)
+    if request.method == "POST":
+        if (
+            bcrypt.check_password_hash(current_user.password, form.password.data)
+            and form.amount.data > 0
+        ):
+            user = Customer.query.filter_by(id=current_user.id).first()
+            user.balance = user.balance + int(form.amount.data)
             db.session.commit()
-            flash('Deposit was successful!','info')
+            flash("Deposit was successful!", "info")
         else:
-            flash('Wrong password or Amount!','danger')
+            flash("Wrong password or Amount!", "danger")
     return render_template("deposit.html", title="Deposit", form=form)
 
 
-@app.route("/withdraw",methods=["POST", "GET"])
+@app.route("/withdraw", methods=["POST", "GET"])
 @login_required
 def withdraw():
     form = WithdrawForm()
-    if request.method=="POST":
-            if bcrypt.check_password_hash(current_user.password, form.password.data) and form.amount.data>0:
-                user=Customer.query.filter_by(id=current_user.id).first()
-                if current_user.balance>=form.amount.data:
-                    user.balance-=int(form.amount.data)
-                    db.session.commit()
-                    flash('Withdrawl was successful!','info')
-                else:
-                    flash('Insufficient Funds to withdraw','warning')
+    if request.method == "POST":
+        if (
+            bcrypt.check_password_hash(current_user.password, form.password.data)
+            and form.amount.data > 0
+        ):
+            user = Customer.query.filter_by(id=current_user.id).first()
+            if current_user.balance >= form.amount.data:
+                user.balance -= int(form.amount.data)
+                db.session.commit()
+                flash("Withdrawl was successful!", "info")
             else:
-                flash('Wrong password or Amount!','danger')
+                flash("Insufficient Funds to withdraw", "warning")
+        else:
+            flash("Wrong password or Amount!", "danger")
     return render_template("withdraw.html", title="Withdraw", form=form)
 
 
-@app.route("/transfer",methods=["POST", "GET"])
+@app.route("/transfer", methods=["POST", "GET"])
 @login_required
 def transfer():
     form = TransferForm()
-    if request.method=="POST":
-            if bcrypt.check_password_hash(current_user.password, form.password.data) and form.amount.data>0:
-                sender_customer=Customer.query.filter_by(id=current_user.id).first()
-                
-                receiver_customer=Customer.query.filter_by(account_number=form.account_number.data).first()
-                if current_user.balance>=form.amount.data:
-                    sender_customer.balance-=int(form.amount.data)
-                    receiver_customer.balance+=int (form.amount.data)
-                    db.session.commit()
-                    flash('Transfer was successful!','info')
-                    return redirect(url_for('transfer'))
-                else:
-                    flash('Insufficient Funds to transfer!','warning')
+    if request.method == "POST":
+        if (
+            bcrypt.check_password_hash(current_user.password, form.password.data)
+            and form.amount.data > 0
+        ):
+            sender_customer = Customer.query.filter_by(id=current_user.id).first()
+
+            receiver_customer = Customer.query.filter_by(
+                account_number=form.account_number.data
+            ).first()
+            if current_user.balance >= form.amount.data:
+                sender_customer.balance -= int(form.amount.data)
+                receiver_customer.balance += int(form.amount.data)
+                db.session.commit()
+                flash("Transfer was successful!", "info")
+                return redirect(url_for("transfer"))
             else:
-                flash('Wrong password or Amount!','danger')
+                flash("Insufficient Funds to transfer!", "warning")
+        else:
+            flash("Wrong password or Amount!", "danger")
     return render_template("transfer.html", title="Transfer", form=form)
 
 
@@ -234,8 +265,47 @@ def account():
     return render_template(
         "account.html", title="Account", form=form, image_file=image_file
     )
-@app.route("/admin/notification/requests", methods=["POST", "GET"])
+
+
+@app.route("/admin/notification/requests", methods=["GET"])
 @login_required
 def account_request():
+    requests = Requests.query.all()
+    return render_template(
+        "admin/account_request.html", title="Request", requests=requests
+    )
 
-    return render_template("admin/account_request.html", title="Request")
+
+@app.route("/admin/notification/acc_requests/<id>", methods=["GET"])
+@login_required
+def accept_account_request(id):
+    request = Requests.query.filter_by(id=id).first()
+    user = null
+    if request.user_type == "customer":
+        user = Customer(
+            username=request.username,
+            email=request.email,
+            password=request.password,
+            account_number=request.account_number,
+        )
+    elif request.user_type == "systemuser":
+        user = SystemUser(
+            username=request.username,
+            email=request.email,
+            password=request.password,
+        )
+    db.session.add(user)
+    db.session.delete(request)
+    db.session.commit()
+    flash("Account Approved!", "info")
+    return redirect(url_for("account_request"))
+
+
+@app.route("/admin/notification/rej_requests/<id>", methods=["GET"])
+@login_required
+def reject_account_request(id):
+    request = Requests.query.filter_by(id=id).first()
+    db.session.delete(request)
+    db.session.commit()
+    flash("Account Rejected!", "warning")
+    return redirect(url_for("account_request"))

@@ -84,7 +84,7 @@ class SystemUserView(ModelView):
             },
     }
 } 
-admin.add_link(LogoutMenueLink(name='logout',category='',url='/logout'))
+admin.add_link(LogoutMenueLink(name='Logout',category='',url='/logout'))
 admin.add_view(SuperAdminView(SuperAdmin,db.session))
 admin.add_view(SystemUserView(SystemUser,db.session))
 admin.add_view(CustomerView(Customer,db.session))
