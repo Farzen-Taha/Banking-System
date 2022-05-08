@@ -11,6 +11,7 @@ app.config['SECRET_KEY']="436ef4721d03cc15224c24af0a6b2a4f"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 
 db = SQLAlchemy(app)
+
 bcrypt=Bcrypt(app)
 login_manager=LoginManager(app)
 login_manager.login_view='login'
@@ -53,7 +54,10 @@ class SuperAdminView(ModelView):
 class CustomerView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and (current_user.user_type=='superadmin' or current_user.user_type=='systemuser')
-
+    def on_model_change(self, form, model, is_created):
+        hashed_pw = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+        model.password=hashed_pw
+        return super().on_model_change(form, model, is_created)
     form_widget_args = {
         'user_type':{
             'readonly': True
@@ -69,7 +73,11 @@ class CustomerView(ModelView):
 }
 class SystemUserView(ModelView):
     def is_accessible(self):
-        return current_user.is_authenticated and (current_user.user_type=='superadmin' or current_user.user_type=='systemuser')
+        return current_user.is_authenticated and (current_user.user_type=='superadmin')
+    def on_model_change(self, form, model, is_created):
+        hashed_pw = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
+        model.password=hashed_pw
+        return super().on_model_change(form, model, is_created)
     form_widget_args = {
         'user_type':{
             'readonly': True
@@ -93,3 +101,4 @@ admin.add_view(NotificationsView(name='Notifications',endpoint='notification'))
 
 
 from bankingsystem import routes
+db.create_all()

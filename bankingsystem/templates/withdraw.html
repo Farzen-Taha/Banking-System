@@ -3,7 +3,9 @@
 <div class="content-section">
     <form method="POST" action="">
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Withdraw</legend> 
+            <legend class="border-bottom mb-4">Withdraw</legend>
+            <p>Current Balance </p>
+            <span class="border rounded d-block p-2 text-black">{{fund}}</span> 
             <div class="form-group">
                 {{ form.amount.label(class="form-control-label")}}
                 {% if form.amount.errors %}

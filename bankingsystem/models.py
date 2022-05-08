@@ -8,6 +8,8 @@ from bankingsystem import bcrypt
 from random import randint
 # from itsdangerous import TimedJSONWebSignatureSerializer as serializer
 import os
+
+
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))

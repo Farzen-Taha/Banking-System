@@ -3,7 +3,10 @@
 <div class="content-section">
     <form method="POST" action="" enctype="multipart/form-data">
         <fieldset class="form-group">
+            
             <legend class="border-bottom mb-4">Deposit</legend> 
+            <p>Current Balance </p>
+            <span class="border rounded d-block p-2 text-black">{{fund}}</span>
             <div class="form-group">
                 {{ form.amount.label(class="form-control-label")}}
                 {% if form.amount.errors %}
@@ -17,7 +20,6 @@
             {%else%}
              {{form.amount(class="form-control form-control-lg")}}
             {%endif%}
-            
             </div>
   
             <div class="form-group">
