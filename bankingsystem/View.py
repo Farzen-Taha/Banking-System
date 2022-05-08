@@ -184,14 +184,14 @@ def transfer_fund():
             receiver_customer = Customer.query.filter_by(
                 account_number=form.account_number.data
             ).first()
-            if current_user.balance >= form.amount.data:
+            if (current_user.balance >= form.amount.data)and (current_user.account_number!=form.account_number.data):
                 sender_customer.balance -= int(form.amount.data)
                 receiver_customer.balance += int(form.amount.data)
                 db.session.commit()
                 flash("Transfer was successful!", "info")
                 return redirect(url_for("transfer"))
             else:
-                flash("Insufficient Funds to transfer!", "warning")
+                flash("Insufficient Funds to transfer or Invalid account number!", "warning")
         else:
             flash("Wrong password or Amount!", "danger")
     return render_template("transfer.html", title="Transfer", form=form,fund=show_fund())
