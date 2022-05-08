@@ -13,7 +13,7 @@ from bankingsystem.form import (
     WithdrawForm,
     UpdatAccountForm,
 )
-from bankingsystem.utilities import set_password,validate_password,set_new_password,hash_user_password
+from bankingsystem.utilities import set_password,validate_password,set_new_password,hash_user_password,set_account_number
 from bankingsystem import app, db, bcrypt
 import secrets
 import os
@@ -81,10 +81,7 @@ def user_register():
             )
             return redirect(url_for("login"))
         elif form.account_type.data == "CU":
-            n = 10
-            range_start = 10 ** (n - 1)
-            range_end = (10**n) - 1
-            account_number = randint(range_start, range_end)
+            account_number = set_account_number()
             # customer = Customer(
             #     username=form.username.data,
             #     email=form.email.data,
@@ -249,7 +246,7 @@ def get_all_account_requests():
     )
 
 
-def accept_request():
+def accept_request(id):
     request = Requests.query.filter_by(id=id).first()
     user = None
     if request.user_type == "customer":

@@ -80,7 +80,7 @@ def account_request():
 @app.route("/admin/notification/acc_requests/<id>", methods=["GET"])
 @login_required
 def accept_account_request(id):
-    return accept_request()
+    return accept_request(id)
 
 
 @app.route("/admin/notification/rej_requests/<id>", methods=["GET"])
