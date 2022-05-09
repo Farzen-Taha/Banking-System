@@ -13,15 +13,18 @@ from bankingsystem.form import (
     WithdrawForm,
     UpdatAccountForm,
 )
-from bankingsystem.utilities import set_password,validate_password,set_new_password,hash_user_password,set_account_number
+from bankingsystem.utilities import set_password, validate_password, set_new_password, hash_user_password, \
+    set_account_number
 from bankingsystem import app, db, bcrypt
 import secrets
 import os
 from PIL import Image
 
+
 # def hash_user_password(password):
 #     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
 #     return hashed_pw
+
 
 def user_register():
     form = RegistrationForm()
@@ -32,9 +35,7 @@ def user_register():
             # if there is not a super admin create one
             if super_admin is None:
                 super_admin = SuperAdmin(
-                    username=form.username.data,
-                    email=form.email.data,
-                    password=hashed_pw,
+                    username=form.username.data, email=form.email.data, password=hashed_pw,
                 )
                 db.create_all()
                 db.session.add(super_admin)
@@ -109,40 +110,42 @@ def user_login():
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():
-        SA = SuperAdmin.query.filter_by(email=form.email.data).first()
-        SU = SystemUser.query.filter_by(email=form.email.data).first()
-        CU = Customer.query.filter_by(email=form.email.data).first()
+        sa = SuperAdmin.query.filter_by(email=form.email.data).first()
+        su = SystemUser.query.filter_by(email=form.email.data).first()
+        cu = Customer.query.filter_by(email=form.email.data).first()
 
-        if SA and validate_password(SA.password, form.password.data):
-            login_user(SA, remember=form.remember.data)
+        if sa and validate_password(sa.password, form.password.data):
+            login_user(sa, remember=form.remember.data)
             next_page = request.args.get("next")
             return (
                 redirect(next_page) if next_page else redirect(url_for("admin.index"))
             )
-        elif SU and validate_password(SU.password, form.password.data):
-            login_user(SU, remember=form.remember.data)
+        elif su and validate_password(su.password, form.password.data):
+            login_user(su, remember=form.remember.data)
             next_page = request.args.get("next")
             return (
                 redirect(next_page) if next_page else redirect(url_for("admin.index"))
             )
-        elif CU and validate_password(CU.password, form.password.data):
-            login_user(CU, remember=form.remember.data)
+        elif cu and validate_password(cu.password, form.password.data):
+            login_user(cu, remember=form.remember.data)
             next_page = request.args.get("next")
             return redirect(next_page) if next_page else redirect(url_for("users"))
         else:
             flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
 
+
 def show_fund():
-    fund=Customer.query.filter_by(id=current_user.id).first()
+    fund = Customer.query.filter_by(id=current_user.id).first()
     return fund.balance
+
 
 def deposit_fund():
     form = DepositForm()
     if request.method == "POST":
         if (
-            validate_password(current_user.password, form.password.data)
-            and form.amount.data > 0
+                validate_password(current_user.password, form.password.data)
+                and form.amount.data > 0
         ):
             user = Customer.query.filter_by(id=current_user.id).first()
             user.balance = user.balance + int(form.amount.data)
@@ -150,15 +153,15 @@ def deposit_fund():
             flash("Deposit was successful!", "info")
         else:
             flash("Wrong password or Amount!", "danger")
-    return render_template("deposit.html", title="Deposit", form=form,fund=show_fund())
+    return render_template("deposit.html", title="Deposit", form=form, fund=show_fund())
 
 
 def withdraw_fund():
     form = WithdrawForm()
     if request.method == "POST":
         if (
-            validate_password(current_user.password, form.password.data)
-            and form.amount.data > 0
+                validate_password(current_user.password, form.password.data)
+                and form.amount.data > 0
         ):
             user = Customer.query.filter_by(id=current_user.id).first()
             if current_user.balance >= form.amount.data:
@@ -169,22 +172,22 @@ def withdraw_fund():
                 flash("Insufficient Funds to withdraw", "warning")
         else:
             flash("Wrong password or Amount!", "danger")
-    return render_template("withdraw.html", title="Withdraw", form=form,fund=show_fund())
+    return render_template("withdraw.html", title="Withdraw", form=form, fund=show_fund())
 
 
 def transfer_fund():
     form = TransferForm()
     if request.method == "POST":
         if (
-            validate_password(current_user.password, form.password.data)
-            and form.amount.data > 0
+                validate_password(current_user.password, form.password.data)
+                and form.amount.data > 0
         ):
             sender_customer = Customer.query.filter_by(id=current_user.id).first()
 
             receiver_customer = Customer.query.filter_by(
                 account_number=form.account_number.data
             ).first()
-            if (current_user.balance >= form.amount.data)and (current_user.account_number!=form.account_number.data):
+            if (current_user.balance >= form.amount.data) and (current_user.account_number != form.account_number.data):
                 sender_customer.balance -= int(form.amount.data)
                 receiver_customer.balance += int(form.amount.data)
                 db.session.commit()
@@ -194,7 +197,7 @@ def transfer_fund():
                 flash("Insufficient Funds to transfer or Invalid account number!", "warning")
         else:
             flash("Wrong password or Amount!", "danger")
-    return render_template("transfer.html", title="Transfer", form=form,fund=show_fund())
+    return render_template("transfer.html", title="Transfer", form=form, fund=show_fund())
 
 
 def save_picture(form_picture):
@@ -213,15 +216,16 @@ def save_picture(form_picture):
 def update_account():
     form = UpdatAccountForm()
     if form.validate_on_submit():
-        if validate_password(current_user.password,form.current_password.data):
+        if validate_password(current_user.password, form.current_password.data):
             if form.picture.data:
                 picture_file = save_picture(form.picture.data)
                 current_user.image_file = picture_file
             current_user.username = form.username.data
             current_user.email = form.email.data
-            update_password_result=False
+            update_password_result = False
             if form.new_password.data:
-                update_password_result=set_new_password(current_user.password,form.current_password.data,form.new_password.data)
+                update_password_result = set_new_password(current_user.password, form.current_password.data,
+                                                          form.new_password.data)
             if update_password_result:
                 flash("Your account has updated succesfully and password changed!", "success")
             else:

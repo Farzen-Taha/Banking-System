@@ -13,6 +13,7 @@ from bankingsystem.View import (
 )
 from bankingsystem import app
 
+
 @app.route("/")
 @app.route("/home")
 def home():
@@ -86,4 +87,4 @@ def accept_account_request(id):
 @app.route("/admin/notification/rej_requests/<id>", methods=["GET"])
 @login_required
 def reject_account_request(id):
-   return reject_request()
+    return reject_request()

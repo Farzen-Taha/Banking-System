@@ -11,8 +11,8 @@ from bankingsystem.utilities import set_account_number
 class MyAdminIndexView(AdminIndexView):
     def is_accessible(self):
         return current_user.is_authenticated and (
-            current_user.user_type == "superadmin"
-            or current_user.user_type == "systemuser"
+                current_user.user_type == "superadmin"
+                or current_user.user_type == "systemuser"
         )
 
 
@@ -56,8 +56,8 @@ class CustomerView(ModelView):
 
     def is_accessible(self):
         return current_user.is_authenticated and (
-            current_user.user_type == "superadmin"
-            or current_user.user_type == "systemuser"
+                current_user.user_type == "superadmin"
+                or current_user.user_type == "systemuser"
         )
 
     def on_model_change(self, form, model, is_created):
@@ -83,7 +83,7 @@ class SystemUserView(ModelView):
 
     def is_accessible(self):
         return current_user.is_authenticated and (
-            current_user.user_type == "superadmin"
+                current_user.user_type == "superadmin"
         )
 
     def on_model_change(self, form, model, is_created):
