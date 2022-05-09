@@ -22,11 +22,6 @@ import os
 from PIL import Image
 
 
-# def hash_user_password(password):
-#     hashed_pw = bcrypt.generate_password_hash(password).decode("utf-8")
-#     return hashed_pw
-
-
 def user_register():
     form = RegistrationForm()
     if form.validate_on_submit():
@@ -35,9 +30,7 @@ def user_register():
             super_admin = SuperAdmin.query.first()
             # if there is not a super admin create one
             if super_admin is None:
-                super_admin = SuperAdmin(
-                    username=form.username.data, email=form.email.data, password=hashed_pw,
-                )
+                super_admin = SuperAdmin(username=form.username.data, email=form.email.data, password=hashed_pw)
                 db.create_all()
                 db.session.add(super_admin)
                 db.session.commit()
@@ -51,24 +44,13 @@ def user_register():
                     password=hashed_pw,
                     user_type="systemuser",
                 )
-                flash(
-                    "There is already a Super Admin account. Please wait so that your account be verified.",
-                    "warning",
-                )
+                flash("There is already a Super Admin account. Please wait so that your account be verified.",
+                      "warning")
                 db.create_all()
                 db.session.add(request)
                 db.session.commit()
 
         elif form.account_type.data == "SU":
-            # system_user = SystemUser(
-            #     username=form.username.data,
-            #     email=form.email.data,
-            #     password=hashed_pw,
-            # )
-            # db.create_all()
-
-            # db.session.add(system_user)
-            # db.session.commit()
             account_request = Requests(
                 username=form.username.data,
                 email=form.email.data,
@@ -78,18 +60,10 @@ def user_register():
             db.create_all()
             db.session.add(account_request)
             db.session.commit()
-            flash(
-                "Your data saved. Please wait so that your account be verified.", "info"
-            )
+            flash("Your data saved. Please wait so that your account be verified.", "info")
             return redirect(url_for("login"))
         elif form.account_type.data == "CU":
             account_number = set_account_number()
-            # customer = Customer(
-            #     username=form.username.data,
-            #     email=form.email.data,
-            #     password=hashed_pw,
-            #     account_number=account_number,
-            # )
             account_request = Requests(
                 username=form.username.data,
                 email=form.email.data,
@@ -118,15 +92,12 @@ def user_login():
         if sa and validate_password(sa.password, form.password.data):
             login_user(sa, remember=form.remember.data)
             next_page = request.args.get("next")
-            return (
-                redirect(next_page) if next_page else redirect(url_for("admin.index"))
-            )
+            return redirect(next_page) if next_page else redirect(url_for("admin.index"))
+
         elif su and validate_password(su.password, form.password.data):
             login_user(su, remember=form.remember.data)
             next_page = request.args.get("next")
-            return (
-                redirect(next_page) if next_page else redirect(url_for("admin.index"))
-            )
+            return redirect(next_page) if next_page else redirect(url_for("admin.index"))
         elif cu and validate_password(cu.password, form.password.data):
             login_user(cu, remember=form.remember.data)
             next_page = request.args.get("next")
@@ -137,8 +108,7 @@ def user_login():
 
 
 def log_transaction(sender_id, receiver_id, amount, type):
-    log = TransactionLog(sender_id=sender_id, receiver_id=receiver_id, fund_amount=amount,
-                         transaction_type=type)
+    log = TransactionLog(sender_id=sender_id, receiver_id=receiver_id, fund_amount=amount, transaction_type=type)
     db.session.add(log)
     db.session.commit()
 
@@ -151,10 +121,8 @@ def show_fund():
 def deposit_fund():
     form = DepositForm()
     if request.method == "POST":
-        if (
-                validate_password(current_user.password, form.password.data)
-                and form.amount.data > 0
-        ):
+
+        if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
             user = Customer.query.filter_by(id=current_user.id).first()
             user.balance = user.balance + int(form.amount.data)
             log_transaction(current_user.id, current_user.id, form.amount.data, "deposit")
@@ -164,21 +132,11 @@ def deposit_fund():
             flash("Wrong password or Amount!", "danger")
     return render_template("deposit.html", title="Deposit", form=form, fund=show_fund())
 
-    #
-    #
-    # elif type == "withdraw""":
-    #     pass
-    # elif type == "deposit""":
-    #     pass
-
 
 def withdraw_fund():
     form = WithdrawForm()
     if request.method == "POST":
-        if (
-                validate_password(current_user.password, form.password.data)
-                and form.amount.data > 0
-        ):
+        if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
             user = Customer.query.filter_by(id=current_user.id).first()
             if current_user.balance >= form.amount.data:
                 user.balance -= int(form.amount.data)
@@ -195,19 +153,13 @@ def withdraw_fund():
 def transfer_fund():
     form = TransferForm()
     if request.method == "POST":
-        if (
-                validate_password(current_user.password, form.password.data)
-                and form.amount.data > 0
-        ):
+        if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
             sender_customer = Customer.query.filter_by(id=current_user.id).first()
-
-            receiver_customer = Customer.query.filter_by(
-                account_number=form.account_number.data
-            ).first()
+            receiver_customer = Customer.query.filter_by(account_number=form.account_number.data).first()
             if (current_user.balance >= form.amount.data) and (current_user.account_number != form.account_number.data):
                 sender_customer.balance -= int(form.amount.data)
                 receiver_customer.balance += int(form.amount.data)
-                log_transaction(current_user.id, current_user.id, form.amount.data, "transfer")
+                log_transaction(current_user.id, receiver_customer.id, form.amount.data, "transfer")
                 db.session.commit()
                 flash("Transfer was successful!", "info")
                 return redirect(url_for("transfer"))
@@ -256,34 +208,22 @@ def update_account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     image_file = url_for("static", filename="profile_pic/" + current_user.image_file)
-    return render_template(
-        "account.html", title="Account", form=form, image_file=image_file
-    )
+    return render_template("account.html", title="Account", form=form, image_file=image_file)
 
 
 def get_all_account_requests():
     requests = Requests.query.all()
-    return render_template(
-        "admin/account_request.html", title="Request", requests=requests
-    )
+    return render_template("admin/account_request.html", title="Request", requests=requests)
 
 
 def accept_request(id):
     request = Requests.query.filter_by(id=id).first()
     user = None
     if request.user_type == "customer":
-        user = Customer(
-            username=request.username,
-            email=request.email,
-            password=request.password,
-            account_number=request.account_number,
-        )
+        user = Customer(username=request.username, email=request.email, password=request.password,
+                        account_number=request.account_number)
     elif request.user_type == "systemuser":
-        user = SystemUser(
-            username=request.username,
-            email=request.email,
-            password=request.password,
-        )
+        user = SystemUser(username=request.username, email=request.email, password=request.password)
     db.session.add(user)
     db.session.delete(request)
     db.session.commit()
@@ -301,7 +241,4 @@ def reject_request():
 
 def transactionshisory():
     transactions = TransactionLog.query.all()
-
-    return render_template(
-        "admin/transactionslog.html", title="transactions history", transactions=transactions
-    )
+    return render_template("admin/transactionslog.html", title="transactions history", transactions=transactions)
