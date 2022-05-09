@@ -1,4 +1,3 @@
-from pickle import TRUE
 from flask_login import current_user
 from bankingsystem import bcrypt
 from random import randint
@@ -33,3 +32,4 @@ def set_account_number():
     range_end = (10 ** n) - 1
     account_number = randint(range_start, range_end)
     return account_number
+

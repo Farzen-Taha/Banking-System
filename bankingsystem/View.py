@@ -137,7 +137,7 @@ def log_transaction(sender_id, receiver_id, amount, type):
 
 def show_fund():
     """
-
+    * this function shows users balance amount to user based on users id.
     :return:
     """
     fund = Customer.query.filter_by(id=current_user.id).first()
@@ -145,6 +145,11 @@ def show_fund():
 
 
 def deposit_fund():
+    """
+    * This function adds some amount of fund to users balance.
+    * It also stores the log of the transaction.
+    :return:
+    """
     form = DepositForm()
     if request.method == "POST":
 
@@ -160,6 +165,11 @@ def deposit_fund():
 
 
 def withdraw_fund():
+    """
+    * This function withdraw some amount of fund from user's account and decrease it in the database.
+    * It also stores the log of the transaction.
+    :return:
+    """
     form = WithdrawForm()
     if request.method == "POST":
         if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
@@ -177,6 +187,11 @@ def withdraw_fund():
 
 
 def transfer_fund():
+    """
+    * This function transfer some amount of fund from one customer to the other customer based on their account numbers.
+    * It also stores the log of the transaction.
+    :return:
+    """
     form = TransferForm()
     if request.method == "POST":
         if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
@@ -197,15 +212,23 @@ def transfer_fund():
 
 
 def save_picture(form_picture):
+    """
+    * This function changes the name of the picture to a random 8bit plus its extension .
+    * This function also resizes the picture to 125*125 pixels and saves to a directory.
+    * As output it returns the new name of the picture.
+    
+    :param form_picture:
+    :return:
+    """
     random_hex = secrets.token_hex(8)
     _, f_ext = os.path.splitext(form_picture.filename)
-    picture_fn = random_hex + f_ext
-    picture_path = os.path.join(app.root_path, "static/profile_pic", picture_fn)
+    picture_file_name = random_hex + f_ext
+    picture_path = os.path.join(app.root_path, "static/profile_pic", picture_file_name)
     output_size = (125, 125)
     i = Image.open(form_picture)
     i.thumbnail(output_size)
     i.save(picture_path)
-    return picture_fn
+    return picture_file_name
 
 
 def update_account():
@@ -256,7 +279,7 @@ def accept_request(id):
     return redirect(url_for("account_request"))
 
 
-def reject_request():
+def reject_request(id):
     request = Requests.query.filter_by(id=id).first()
     db.session.delete(request)
     db.session.commit()

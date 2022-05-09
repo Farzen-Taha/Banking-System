@@ -1,6 +1,5 @@
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import current_user
+
+from flask_login import current_user, login_required
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
@@ -11,13 +10,16 @@ from bankingsystem.utilities import set_account_number
 class MyAdminIndexView(AdminIndexView):
     def is_accessible(self):
         return current_user.is_authenticated and (
-                current_user.user_type == "superadmin"
-                or current_user.user_type == "systemuser"
-        )
+                    current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
 
 
 class NotificationsView(BaseView):
+    def is_accessible(self):
+        return current_user.is_authenticated and (
+                current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
+
     @expose("/")
+    @login_required
     def notification(self):
         return self.render("admin/notification.html")
 
@@ -33,6 +35,7 @@ class SuperAdminView(ModelView):
 
     form_excluded_columns = "image_file"
     column_exclude_list = "password"
+    column_searchable_list = ('username',)
 
     def on_model_change(self, form, model, is_created):
         model.password = set_password(form.password.data)
@@ -53,10 +56,10 @@ class SuperAdminView(ModelView):
 class CustomerView(ModelView):
     form_excluded_columns = "image_file"
     column_exclude_list = "password"
-
+    column_searchable_list = ('username',)
     def is_accessible(self):
         return current_user.is_authenticated and (
-                    current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
+                current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
 
     def on_model_change(self, form, model, is_created):
         model.password = set_password(form.password.data)
@@ -78,6 +81,8 @@ class CustomerView(ModelView):
 class SystemUserView(ModelView):
     form_excluded_columns = "image_file"
     column_exclude_list = "password"
+
+    column_searchable_list = ('username',)
 
     def is_accessible(self):
         return current_user.is_authenticated and (current_user.user_type == "superadmin")
