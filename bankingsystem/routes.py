@@ -97,6 +97,7 @@ def reject_account_request(id):
 def transactionslog():
     return transactionshisory()
 
+
 @app.route("/transactions/alltransactions", methods=["POST","GET"])
 @login_required
 def users_transactions_hist():

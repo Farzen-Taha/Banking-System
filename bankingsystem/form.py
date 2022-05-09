@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, IntegerField, StringField, PasswordField, SubmitField, BooleanField, ValidationError
-from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
+from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError,Regexp
 from bankingsystem.models import SuperAdmin, SystemUser, Customer
 from flask_login import current_user
 from bankingsystem.models import User
@@ -8,7 +8,7 @@ from flask_wtf.file import FileField, FileAllowed
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20), Regexp('^\w+$',message='Username must contain only letters numbers or underscore')])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
