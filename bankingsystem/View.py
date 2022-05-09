@@ -1,6 +1,6 @@
 from fileinput import filename
 from sqlalchemy import delete
-from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests
+from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests, TransactionLog
 from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_required, login_user, logout_user, current_user
 from random import randint
@@ -12,6 +12,7 @@ from bankingsystem.form import (
     WithdrawForm,
     WithdrawForm,
     UpdatAccountForm,
+
 )
 from bankingsystem.utilities import set_password, validate_password, set_new_password, hash_user_password, \
     set_account_number
@@ -135,6 +136,13 @@ def user_login():
     return render_template("login.html", title="Login", form=form)
 
 
+def log_transaction(sender_id, receiver_id, amount, type):
+    log = TransactionLog(sender_id=sender_id, receiver_id=receiver_id, fund_amount=amount,
+                         transaction_type=type)
+    db.session.add(log)
+    db.session.commit()
+
+
 def show_fund():
     fund = Customer.query.filter_by(id=current_user.id).first()
     return fund.balance
@@ -149,11 +157,19 @@ def deposit_fund():
         ):
             user = Customer.query.filter_by(id=current_user.id).first()
             user.balance = user.balance + int(form.amount.data)
+            log_transaction(current_user.id, current_user.id, form.amount.data, "deposit")
             db.session.commit()
             flash("Deposit was successful!", "info")
         else:
             flash("Wrong password or Amount!", "danger")
     return render_template("deposit.html", title="Deposit", form=form, fund=show_fund())
+
+    #
+    #
+    # elif type == "withdraw""":
+    #     pass
+    # elif type == "deposit""":
+    #     pass
 
 
 def withdraw_fund():
@@ -166,6 +182,7 @@ def withdraw_fund():
             user = Customer.query.filter_by(id=current_user.id).first()
             if current_user.balance >= form.amount.data:
                 user.balance -= int(form.amount.data)
+                log_transaction(current_user.id, current_user.id, form.amount.data, "withdraw")
                 db.session.commit()
                 flash("Withdrawl was successful!", "info")
             else:
@@ -190,6 +207,7 @@ def transfer_fund():
             if (current_user.balance >= form.amount.data) and (current_user.account_number != form.account_number.data):
                 sender_customer.balance -= int(form.amount.data)
                 receiver_customer.balance += int(form.amount.data)
+                log_transaction(current_user.id, current_user.id, form.amount.data, "transfer")
                 db.session.commit()
                 flash("Transfer was successful!", "info")
                 return redirect(url_for("transfer"))
@@ -279,3 +297,11 @@ def reject_request():
     db.session.commit()
     flash("Account Rejected!", "warning")
     return redirect(url_for("account_request"))
+
+
+def transactionshisory():
+    transactions = TransactionLog.query.all()
+
+    return render_template(
+        "admin/transactionslog.html", title="transactions history", transactions=transactions
+    )

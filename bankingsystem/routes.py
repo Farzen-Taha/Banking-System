@@ -10,6 +10,7 @@ from bankingsystem.View import (
     deposit_fund,
     withdraw_fund,
     transfer_fund,
+    transactionshisory
 )
 from bankingsystem import app
 
@@ -88,3 +89,9 @@ def accept_account_request(id):
 @login_required
 def reject_account_request(id):
     return reject_request()
+
+
+@app.route("/admin/notification/transactionslog", methods=["POST","GET"])
+@login_required
+def transactionslog():
+    return transactionshisory()

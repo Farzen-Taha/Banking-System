@@ -1,0 +1,27 @@
+{% extends "layout.html" %}
+{% block content %}
+<table class="table">
+    <thead class="table-dark">
+    <tr>
+        <th>Reference Number</th>
+        <th>Sender Id</th>
+        <th>receiver Id</th>
+        <th>Amount</th>
+        <th>Transactions Type</th>
+        <th>Date</th>
+    </tr>
+    </thead>
+    <tbody>
+    {%for transaction in transactions %}
+    <tr>
+        <td>{{transaction.reference_number}}</td>
+        <td>{{transaction.sender_id}}</td>
+        <td>{{transaction.receiver_id}}</td>
+        <td>{{transaction.fund_amount}}</td>
+        <td>{{transaction.transaction_type}}</td>
+        <td>{{transaction.date}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
