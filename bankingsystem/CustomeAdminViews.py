@@ -56,9 +56,7 @@ class CustomerView(ModelView):
 
     def is_accessible(self):
         return current_user.is_authenticated and (
-                current_user.user_type == "superadmin"
-                or current_user.user_type == "systemuser"
-        )
+                    current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
 
     def on_model_change(self, form, model, is_created):
         model.password = set_password(form.password.data)
@@ -82,9 +80,7 @@ class SystemUserView(ModelView):
     column_exclude_list = "password"
 
     def is_accessible(self):
-        return current_user.is_authenticated and (
-                current_user.user_type == "superadmin"
-        )
+        return current_user.is_authenticated and (current_user.user_type == "superadmin")
 
     def on_model_change(self, form, model, is_created):
         model.password = set_password(form.password.data)

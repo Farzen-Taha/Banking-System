@@ -8,12 +8,10 @@ from flask_wtf.file import FileField, FileAllowed
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[
-        DataRequired(), Length(min=2, max=20)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField(
-        'Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
     # account_type=['Super Admin','System User','Customer']
     account_type = SelectField(u'Account Type',
                                choices=[('SA', 'Super Admin'), ('SU', 'System User'), ('CU', 'Customer')])
@@ -24,16 +22,14 @@ class RegistrationForm(FlaskForm):
         su = SystemUser.query.filter_by(username=username.data).first()
         cu = Customer.query.filter_by(username=username.data).first()
         if sa or su or cu:
-            raise ValidationError(
-                'That name is taken. Please choose a different one.')
+            raise ValidationError('That name is taken. Please choose a different one.')
 
     def validate_email(self, email):
-        SA = SuperAdmin.query.filter_by(email=email.data).first()
-        SU = SystemUser.query.filter_by(email=email.data).first()
-        CU = Customer.query.filter_by(email=email.data).first()
-        if SA or SU or CU:
-            raise ValidationError(
-                'That email is taken. Please choose a different one.')
+        sa = SuperAdmin.query.filter_by(email=email.data).first()
+        su = SystemUser.query.filter_by(email=email.data).first()
+        cu = Customer.query.filter_by(email=email.data).first()
+        if sa or su or cu:
+            raise ValidationError('That email is taken. Please choose a different one.')
 
 
 class LoginForm(FlaskForm):
@@ -63,27 +59,21 @@ class TransferForm(FlaskForm):
 
 
 class UpdatAccountForm(FlaskForm):
-    username = StringField('Username', validators=[
-        DataRequired(), Length(min=2, max=20)])
+    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    picture = FileField('Update Profile Picture', validators=[
-        FileAllowed(['jpg', 'png'])])
+    picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     current_password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password')
     submit = SubmitField('Update')
-
 
     def validate_username(self, username):
         if username.data != current_user.username:
             user = User.query.filter_by(username=username.data).first()
             if user:
-                raise ValidationError(
-                    'That name is taken. Please choose a different one.')
-
+                raise ValidationError('That name is taken. Please choose a different one.')
 
     def validate_email(self, email):
         if email.data != current_user.email:
             user = User.query.filter_by(email=email.data).first()
             if user:
-                raise ValidationError(
-                    'That email is taken. Please choose a different one.')
+                raise ValidationError('That email is taken. Please choose a different one.')

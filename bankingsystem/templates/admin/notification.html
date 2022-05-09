@@ -1,5 +1,5 @@
 {% extends 'admin/master.html' %}
-{% block body %} 
+{% block body %}
 <div class="panel panel-default">
     <div class="panel-heading">
         <i class="fa fa-bell fa-fw"></i> Notifications Panel
@@ -8,19 +8,20 @@
     <div class="panel-body">
         <div class="list-group">
             <a href="{{url_for('account_request')}}" class="list-group-item">
-                <i class="fa fa-comment fa-fw"></i> Create Account Requests
-                <span class="pull-right text-muted small"><em>4 minutes ago</em>
+                <i class="fa fa-comment fa-fw"></i>
+                <span> Create Account Requests
                 </span>
             </a>
 
-              <a href="{{url_for('transactionslog')}}" class="list-group-item">
-                <i class="fa fa-comment fa-fw"></i> See all the transactions
+            <a href="{{url_for('transactionslog')}}" class="list-group-item">
+                <i class="fa fa-comment fa-fw"></i> <span> See All the Transactions
                 </span>
             </a>
-        <!-- /.list-group -->
-        <a href="#" class="btn btn-default btn-block">View All Alerts</a>
+            <!-- /.list-group -->
+
+        </div>
+        <p>{{name}}</p>
+        <!-- /.panel-body -->
     </div>
-    <p>{{name}}</p>
-    <!-- /.panel-body -->
 </div>
-{% endblock body%}
+{% endblock body %}
