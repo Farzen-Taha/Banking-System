@@ -1,28 +1,34 @@
-from fileinput import filename
-from sqlalchemy import delete
 from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests, TransactionLog
 from flask import render_template, url_for, redirect, flash, request
-from flask_login import login_required, login_user, logout_user, current_user
-from random import randint
+from flask_login import login_user, current_user
+from sqlalchemy import or_
 from bankingsystem.form import (
     RegistrationForm,
     LoginForm,
     DepositForm,
     TransferForm,
     WithdrawForm,
-    WithdrawForm,
     UpdatAccountForm,
 
 )
-from bankingsystem.utilities import set_password, validate_password, set_new_password, hash_user_password, \
-    set_account_number
-from bankingsystem import app, db, bcrypt
+from bankingsystem.utilities import validate_password, set_new_password, hash_user_password, set_account_number
+from bankingsystem import app, db
 import secrets
 import os
 from PIL import Image
 
 
 def user_register():
+    """
+        This function registers users based on the following criteria:
+        * if the user has chosen super admin from dropdown menu, this function creates an object of the SuperAdmin class and
+        stores it in database.
+        * if the user has chosen super system user from dropdown menu, this function creates an object of the System USer
+        class and stores it in database.
+        * if the user has chosen customer from dropdown menu, this function creates an object of the Customer class and
+        stores it in database.
+    :return:
+    """
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_pw = hash_user_password(form.password.data)
@@ -81,6 +87,14 @@ def user_register():
 
 
 def user_login():
+    """
+    This function is used to login users to their accounts in the following way:
+    * if the user was loged in and wants to login agen, the user will be redirected to th home page.
+    * if the user was not loged in, the system will look for the user in the database.
+        if found and their password matched the user will be redirected to users home page. otherwise the user will be
+        shown in a flash message.
+    :return:
+    """
     if current_user.is_authenticated:
         return redirect(url_for("home"))
     form = LoginForm()
@@ -108,12 +122,24 @@ def user_login():
 
 
 def log_transaction(sender_id, receiver_id, amount, type):
+    """
+     This function saves the customers' transaction history.
+    :param sender_id: id of the customer who wants to send fund.
+    :param receiver_id: id of the customer who wants to receive the fund.
+    :param amount: the amount of the fund to be transferred
+    :param type: type of the transaction.
+    :return:
+    """
     log = TransactionLog(sender_id=sender_id, receiver_id=receiver_id, fund_amount=amount, transaction_type=type)
     db.session.add(log)
     db.session.commit()
 
 
 def show_fund():
+    """
+
+    :return:
+    """
     fund = Customer.query.filter_by(id=current_user.id).first()
     return fund.balance
 
@@ -241,3 +267,10 @@ def reject_request():
 def transactionshisory():
     transactions = TransactionLog.query.all()
     return render_template("admin/transactionslog.html", title="transactions history", transactions=transactions)
+
+
+def users_transaction_history():
+    transactions = TransactionLog.query.filter(
+        or_(TransactionLog.sender_id == current_user.id, TransactionLog.receiver_id == current_user.id))
+    # transactions = TransactionLog.query.filter_by(sender_id=current_user.id)|.filter_by(, receiver_id=current_user.id).all()
+    return render_template("userstransactionslog.html", title="transactions history", transactions=transactions)

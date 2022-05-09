@@ -10,7 +10,8 @@ from bankingsystem.View import (
     deposit_fund,
     withdraw_fund,
     transfer_fund,
-    transactionshisory
+    transactionshisory,
+    users_transaction_history
 )
 from bankingsystem import app
 
@@ -95,3 +96,8 @@ def reject_account_request(id):
 @login_required
 def transactionslog():
     return transactionshisory()
+
+@app.route("/transactions/alltransactions", methods=["POST","GET"])
+@login_required
+def users_transactions_hist():
+    return users_transaction_history()
