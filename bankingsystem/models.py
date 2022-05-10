@@ -17,6 +17,10 @@ class User(db.Model, UserMixin):
     user_type = db.Column("type", db.String(50))
     image_file = db.Column(db.String(60), nullable=False, default='default.jpg')
     state=db.Column(db.String(15),default="deactive")
+    
+    
+ 
+
     __mapper_args__ = {"polymorphic_on": user_type}
     def __repr__(self):
         return f"User('{self.username}','{self.email}','{self.user_type}','{self.image_file}')"
@@ -26,9 +30,19 @@ class SuperAdmin(User):
     __tablename__ = "super_admin"
     __mapper_args__ = {"polymorphic_identity": "superadmin"}
     id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True, autoincrement=True)
+    def __init__(self,username,email,password,user_type,image_file,state) :
+        self.username=username
+        self.email=email
+        self.password=password
+        self.user_type=user_type
+        self.image_file=image_file
+        self.state=state
+        db.session.add(self)
+        db.session.commit()
     def __repr__(self):
         return f"SuperAdmin('{self.id}','{self.email}','{self.user_type}','{self.image_file})"
-
+    
+  
 
 class SystemUser(User):
     __tablename__ = "system_user"

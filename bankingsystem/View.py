@@ -95,7 +95,7 @@ def user_login():
         shown in a flash message.
     :return:
     """
-    if current_user.is_authenticated and current_user.state:
+    if current_user.is_authenticated and current_user.state=="acitve":
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():

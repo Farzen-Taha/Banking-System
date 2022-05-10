@@ -44,6 +44,7 @@ class SuperAdminView(ModelView):
     form_extra_fields={"state" : SelectField(u'Change Account state',
                                choices=[ ('active', 'active'),('deactive', 'deactive')])
                     }
+    column_list = ('id', 'user_type','username', 'email',"state")
     form_edit_rules=("username","email","state")
     form_create_rules=("username","email","password")
     form_excluded_columns = ("image_file")
@@ -104,7 +105,7 @@ class SuperAdminView(ModelView):
 
 class CustomerView(ModelView):
     column_display_pk = True
-    column_list = ('id', 'username', 'email',"balance","state")
+    column_list = ('id','user_type' ,'username', 'email',"balance","state")
     form_excluded_columns = ("image_file","user_type")
     column_exclude_list = ("password","image_file")
     column_searchable_list = ('username',)
@@ -167,6 +168,7 @@ class CustomerView(ModelView):
 
 
 class SystemUserView(ModelView):
+    column_list = ('id', 'user_type','username', 'email',"state")
     form_excluded_columns = ("image_file","user_type")
     column_exclude_list = ("password","image_file")
     column_searchable_list = ('username',)
