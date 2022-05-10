@@ -1,12 +1,16 @@
-
+import re
+from flask import flash, request
 from flask_login import current_user, login_required
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
 from flask_admin.menu import MenuLink
+from bankingsystem.models import Customer,SuperAdmin
 from bankingsystem.utilities import set_account_number, set_password
 from bankingsystem.utilities import set_account_number
-
-
+from wtforms import SelectField
+from wtforms.validators import ValidationError
+from bankingsystem.form import User
+from bankingsystem import db
 class MyAdminIndexView(AdminIndexView):
     def is_accessible(self):
         return current_user.is_authenticated and (
@@ -32,14 +36,28 @@ class LogoutMenueLink(MenuLink):
 class SuperAdminView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_type == "superadmin"
+    form_extra_fields={"type" : SelectField(u'Change Account State',
+                               choices=[ ('active', 'Active'),('diactive', 'Diactive')])
+                    }
+    form_edit_rules=("username","email","type")
+    form_create_rules=("username","email","password")
+    form_excluded_columns = ("image_file")
+    column_exclude_list = ("password","image_file")
 
-    form_excluded_columns = "image_file"
-    column_exclude_list = "password"
     column_searchable_list = ('username',)
 
+    def user_name_validation(form,field):
+        size=len(field.data)
+        if size<3 or not re.match('^\w+$',field.data) :
+            raise ValidationError("Username must contain only letters numbers or underscore and bemore than 2 charcter")
+    def email_validation(form,field):
+        if not re.match('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$' ,field.data):
+            raise ValidationError("Invalid email.Please enter valid email.")
+
+    
     def on_model_change(self, form, model, is_created):
-        model.password = set_password(form.password.data)
-        model.account_number = set_account_number()
+        if is_created:
+            model.password = set_password(form.password.data)
         return super().on_model_change(form, model, is_created)
 
     form_widget_args = {
@@ -47,9 +65,22 @@ class SuperAdminView(ModelView):
         "image_file": {"readonly": True},
     }
     form_args = {
+        "username":{
+            "validators":[user_name_validation]
+        },
+        "email":{
+            "validators":[email_validation]
+        },
         "user_type": {
-            "render_kw": {"value": "superadmin"},
-        }
+            "render_kw": {"value": "superadmin"
+            },
+        },"password": {
+            "render_kw": {"type": "password"
+            }
+        },
+
+      
+        
     }
 
 
@@ -74,6 +105,9 @@ class CustomerView(ModelView):
     form_args = {
         "user_type": {
             "render_kw": {"value": "customer"},
+        }, "password": {
+            "render_kw": {"type": "password"
+            }
         }
     }
 
@@ -84,6 +118,7 @@ class SystemUserView(ModelView):
 
     column_searchable_list = ('username',)
 
+  
     def is_accessible(self):
         return current_user.is_authenticated and (current_user.user_type == "superadmin")
 
@@ -98,5 +133,8 @@ class SystemUserView(ModelView):
     form_args = {
         "user_type": {
             "render_kw": {"placeholder": "Enter name", "value": "systemuser"},
+        }, "password": {
+            "render_kw": {"type": "password"
+            }
         }
     }

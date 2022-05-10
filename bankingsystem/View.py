@@ -216,7 +216,7 @@ def save_picture(form_picture):
     * This function changes the name of the picture to a random 8bit plus its extension .
     * This function also resizes the picture to 125*125 pixels and saves to a directory.
     * As output it returns the new name of the picture.
-    
+
     :param form_picture:
     :return:
     """

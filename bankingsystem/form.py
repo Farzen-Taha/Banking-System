@@ -59,7 +59,7 @@ class TransferForm(FlaskForm):
 
 
 class UpdatAccountForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
+    username = StringField('Username', validators=[DataRequired(),Regexp('^\w+$',message='Username must contain only letters numbers or underscore'), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     picture = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'png'])])
     current_password = PasswordField('Current Password', validators=[DataRequired()])
