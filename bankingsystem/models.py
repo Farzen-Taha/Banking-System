@@ -16,6 +16,7 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(60), nullable=False)
     user_type = db.Column("type", db.String(50))
     image_file = db.Column(db.String(60), nullable=False, default='default.jpg')
+    state=db.Column(db.String(15),default="deactive")
     __mapper_args__ = {"polymorphic_on": user_type}
     def __repr__(self):
         return f"User('{self.username}','{self.email}','{self.user_type}','{self.image_file}')"
@@ -39,11 +40,12 @@ class Customer(User):
     __tablename__ = "customer"
     __mapper_args__ = {"polymorphic_identity": "customer"}
 
-    def __init__(self, username, email, password, account_number):
+    def __init__(self, username, email, password, account_number,state):
         self.username = username
         self.email = email
         self.password = password
         self.account_number = account_number
+        self.state=state
 
     id = db.Column("id", db.Integer, db.ForeignKey("user.id"), primary_key=True)
     balance = db.Column(db.Integer, default=0)

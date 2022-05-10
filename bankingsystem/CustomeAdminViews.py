@@ -1,4 +1,6 @@
+
 import re
+from wsgiref.validate import validator
 from flask import flash, request
 from flask_login import current_user, login_required
 from flask_admin import Admin, BaseView, expose, AdminIndexView
@@ -36,15 +38,28 @@ class LogoutMenueLink(MenuLink):
 class SuperAdminView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_type == "superadmin"
-    form_extra_fields={"type" : SelectField(u'Change Account State',
-                               choices=[ ('active', 'Active'),('diactive', 'Diactive')])
+    form_extra_fields={"state" : SelectField(u'Change Account state',
+                               choices=[ ('active', 'active'),('false', 'deactive')])
                     }
-    form_edit_rules=("username","email","type")
+    form_edit_rules=("username","email","state")
     form_create_rules=("username","email","password")
     form_excluded_columns = ("image_file")
     column_exclude_list = ("password","image_file")
 
     column_searchable_list = ('username',)
+
+    def change_state(self,id,form):
+        user = User.query.filter_by(id=id).first()
+        print("----------------------User is-------: ",user)
+        if(form.state.data=="deactive"):
+            user.state= "active"
+            db.session.commit()
+    
+    def update_model(self, form, model):
+        id = request.args.get("id")
+        self.change_state(id,form)
+        return super().update_model(form, model)
+
 
     def user_name_validation(form,field):
         size=len(field.data)
@@ -58,6 +73,7 @@ class SuperAdminView(ModelView):
     def on_model_change(self, form, model, is_created):
         if is_created:
             model.password = set_password(form.password.data)
+        # flash(request.args.id,"sucess")
         return super().on_model_change(form, model, is_created)
 
     form_widget_args = {

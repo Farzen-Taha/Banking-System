@@ -36,7 +36,7 @@ def user_register():
             super_admin = SuperAdmin.query.first()
             # if there is not a super admin create one
             if super_admin is None:
-                super_admin = SuperAdmin(username=form.username.data, email=form.email.data, password=hashed_pw)
+                super_admin = SuperAdmin(username=form.username.data, email=form.email.data, password=hashed_pw,state="active")
                 db.create_all()
                 db.session.add(super_admin)
                 db.session.commit()
@@ -95,7 +95,7 @@ def user_login():
         shown in a flash message.
     :return:
     """
-    if current_user.is_authenticated:
+    if current_user.is_authenticated and current_user.state:
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():
@@ -103,16 +103,16 @@ def user_login():
         su = SystemUser.query.filter_by(email=form.email.data).first()
         cu = Customer.query.filter_by(email=form.email.data).first()
 
-        if sa and validate_password(sa.password, form.password.data):
+        if sa and validate_password(sa.password, form.password.data) and sa.state=="active":
             login_user(sa, remember=form.remember.data)
             next_page = request.args.get("next")
             return redirect(next_page) if next_page else redirect(url_for("admin.index"))
 
-        elif su and validate_password(su.password, form.password.data):
+        elif su and validate_password(su.password, form.password.data)and su.state=="active":
             login_user(su, remember=form.remember.data)
             next_page = request.args.get("next")
             return redirect(next_page) if next_page else redirect(url_for("admin.index"))
-        elif cu and validate_password(cu.password, form.password.data):
+        elif cu and validate_password(cu.password, form.password.data)and cu.state=="active":
             login_user(cu, remember=form.remember.data)
             next_page = request.args.get("next")
             return redirect(next_page) if next_page else redirect(url_for("users"))
@@ -269,9 +269,9 @@ def accept_request(id):
     user = None
     if request.user_type == "customer":
         user = Customer(username=request.username, email=request.email, password=request.password,
-                        account_number=request.account_number)
+                        account_number=request.account_number,state="active")
     elif request.user_type == "systemuser":
-        user = SystemUser(username=request.username, email=request.email, password=request.password)
+        user = SystemUser(username=request.username, email=request.email, password=request.password,state=True)
     db.session.add(user)
     db.session.delete(request)
     db.session.commit()
