@@ -29,6 +29,9 @@ class NotificationsView(BaseView):
     def notification(self):
         return self.render("admin/notification.html")
 
+class accountMenueLink(MenuLink):
+    def is_accessible(self):
+        return current_user.is_authenticated
 
 class LogoutMenueLink(MenuLink):
     def is_accessible(self):
@@ -100,16 +103,48 @@ class SuperAdminView(ModelView):
 
 
 class CustomerView(ModelView):
-    form_excluded_columns = "image_file"
-    column_exclude_list = "password"
+    column_display_pk = True
+    column_list = ('id', 'username', 'email',"balance","state")
+    form_excluded_columns = ("image_file","user_type")
+    column_exclude_list = ("password","image_file")
     column_searchable_list = ('username',)
+    form_edit_rules=("username","email","state")
+    form_create_rules=("username","email","password")
+    
+
+    form_extra_fields={"state" : SelectField(u'Change Account state',
+                               choices=[ ('active', 'active'),('deactive', 'deactive')])
+                    }
+
     def is_accessible(self):
         return current_user.is_authenticated and (
                 current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
 
+
+
+    def user_name_validation(form,field):
+        size=len(field.data)
+        if size<3 or not re.match('^\w+$',field.data) :
+            raise ValidationError("Username must contain only letters numbers or underscore and bemore than 2 charcter")
+    def email_validation(form,field):
+        if not re.match('^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$' ,field.data):
+            raise ValidationError("Invalid email.Please enter valid email.")
+
+    def change_state(self,id,form):
+        user = User.query.filter_by(id=id).first()
+        if(form.state.data=="deactive"):
+            user.state= "active"
+            db.session.commit()
+    
+    def update_model(self, form, model):
+        id = request.args.get("id")
+        self.change_state(id,form)
+        return super().update_model(form, model)
+
     def on_model_change(self, form, model, is_created):
-        model.password = set_password(form.password.data)
-        model.account_number = set_account_number()
+        if is_created:
+            model.password = set_password(form.password.data)
+            model.account_number = set_account_number()
         return super().on_model_change(form, model, is_created)
 
     form_widget_args = {
@@ -118,9 +153,13 @@ class CustomerView(ModelView):
         "account_number": {"readonly": True},
     }
     form_args = {
-        "user_type": {
-            "render_kw": {"value": "customer"},
-        }, "password": {
+        "username":{
+            "validators":[user_name_validation]
+        },
+        "email":{
+            "validators":[email_validation]
+        },
+        "password": {
             "render_kw": {"type": "password"
             }
         }

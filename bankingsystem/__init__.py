@@ -18,10 +18,12 @@ login_manager.login_view = 'login'
 login_manager.login_message_category = 'info'
 from bankingsystem.models import Customer, SuperAdmin, SystemUser
 from bankingsystem.CustomeAdminViews import MyAdminIndexView, SuperAdminView, SystemUserView, CustomerView, \
-    LogoutMenueLink, NotificationsView
+    LogoutMenueLink, NotificationsView, accountMenueLink
 
 admin = Admin(app, template_mode='bootstrap4', index_view=MyAdminIndexView())
 
+
+admin.add_link(accountMenueLink(name='Account', category='', url='/account'))
 admin.add_link(LogoutMenueLink(name='Logout', category='', url='/logout'))
 admin.add_view(SuperAdminView(SuperAdmin, db.session))
 admin.add_view(SystemUserView(SystemUser, db.session))
