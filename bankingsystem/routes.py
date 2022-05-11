@@ -11,7 +11,8 @@ from bankingsystem.View import (
     withdraw_fund,
     transfer_fund,
     transactionshisory,
-    users_transaction_history
+    users_transaction_history,
+    update_user_password
 )
 from bankingsystem import app
 
@@ -102,3 +103,9 @@ def transactionslog():
 @login_required
 def users_transactions_hist():
     return users_transaction_history()
+
+
+@app.route("/changepassword", methods=["POST","GET"])
+@login_required
+def change_password():
+    return update_user_password()

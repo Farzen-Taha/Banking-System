@@ -9,7 +9,7 @@ from bankingsystem.form import (
     TransferForm,
     WithdrawForm,
     UpdatAccountForm,
-
+    UpdatePassword
 )
 from bankingsystem.utilities import validate_password, set_new_password, hash_user_password, set_account_number
 from bankingsystem import app, db
@@ -338,3 +338,14 @@ def users_transaction_history():
         if transactions.has_prev else None
     return render_template("userstransactionslog.html", title="transactions history", transactions=transactions.items,
                            next_url=next_url, prev_url=prev_url)
+def update_user_password():
+    form = UpdatePassword()
+    if form.validate_on_submit():
+        update_password_result = set_new_password(current_user.password, form.password.data,form.new_password.data)
+        db.session.commit()
+        if update_password_result:
+            flash("Your password changed. Please login with your new password!", "success")
+            return redirect(url_for('logout'))
+        else:
+            flash("Your password was not changed!", "warning")
+    return render_template("change_password.html", title="change password", form=form)

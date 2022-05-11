@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationE
 from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests
 from flask_login import current_user
 from bankingsystem.models import User
+from bankingsystem.utilities import validate_password
 from flask_wtf.file import FileField, FileAllowed
 
 
@@ -83,3 +84,11 @@ class UpdatAccountForm(FlaskForm):
             req = Requests.query.filter_by(email=email.data).first()
             if user or req:
                 raise ValidationError('That email is taken. Please choose a different one.')
+
+
+class UpdatePassword(FlaskForm):
+    password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    submit = SubmitField('Update')
+
+
