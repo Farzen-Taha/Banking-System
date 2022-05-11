@@ -9,6 +9,10 @@
             <div class="col">
                 <h2 class="account-heading">{{ current_user.username }}</h2>
                 <p class="text-secondary">{{ current_user.email }}</p>
+                <p class="text-secondary">User ID: {{ current_user.id }}</p>
+                {% if current_user.user_type=="customer" %}
+                <p class="text-secondary">Account Number: {{ current_user.account_number }}</p>
+                {% endif %}
             </div>
         </div>
         <!-- FORM HERE -->

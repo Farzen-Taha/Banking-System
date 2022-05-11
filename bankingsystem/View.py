@@ -242,20 +242,13 @@ def save_picture(form_picture):
 def update_account():
     form = UpdatAccountForm()
     if form.validate_on_submit():
-        if validate_password(current_user.password, form.current_password.data):
+        if validate_password(current_user.password, form.password.data):
             if form.picture.data:
                 picture_file = save_picture(form.picture.data)
                 current_user.image_file = picture_file
             current_user.username = form.username.data
             current_user.email = form.email.data
-            update_password_result = False
-            if form.new_password.data:
-                update_password_result = set_new_password(current_user.password, form.current_password.data,
-                                                          form.new_password.data)
-            if update_password_result:
-                flash("Your account has updated succesfully and password changed!", "success")
-            else:
-                flash("Your profile updated successfuly!", "success")
+            flash("Your profile updated successfuly!", "success")
             db.session.commit()
         else:
             flash("Invalid password", "danger")
@@ -268,7 +261,10 @@ def update_account():
 
 
 def get_all_account_requests():
-    requests = Requests.query.all()
+    if current_user.user_type=="superadmin":
+        requests = Requests.query.all()
+    else:
+        requests = Requests.query.filter_by(user_type="customer").all()
     return render_template("admin/account_request.html", title="Request", requests=requests)
 
 

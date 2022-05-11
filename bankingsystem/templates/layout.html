@@ -34,7 +34,7 @@
             {% if current_user.is_authenticated and current_user.user_type=='customer'%}
             <a class="nav-item nav-link" href="{{url_for('transactions')}}">Transactions</a>
             {% elif current_user.is_authenticated and current_user.user_type=='superadmin' or current_user.user_type=='systemuser' %}
-            <a class="nav-item nav-link" href="{{url_for('admin.index')}}">Home</a>
+            <a class="nav-item nav-link" href="{{url_for('admin.index')}}">Dashboard</a>
             {%endif%}
           </div>
           <!-- Navbar Right Side -->
