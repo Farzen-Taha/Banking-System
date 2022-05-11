@@ -32,31 +32,31 @@ def user_register():
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_pw = hash_user_password(form.password.data)
-        if form.account_type.data == "SA":
-            super_admin = SuperAdmin.query.first()
-            # if there is not a super admin create one
-            if super_admin is None:
-                super_admin = SuperAdmin(username=form.username.data, email=form.email.data, password=hashed_pw,state="active")
-                db.create_all()
-                db.session.add(super_admin)
-                db.session.commit()
-                flash("Your account has been created. You can log in now!", "success")
-                return redirect(url_for("login"))
-            # else send a reques to the existing super admin
-            else:
-                request = Requests(
-                    username=form.username.data,
-                    email=form.email.data,
-                    password=hashed_pw,
-                    user_type="systemuser",
-                )
-                flash("There is already a Super Admin account. Please wait so that your account be verified.",
-                      "warning")
-                db.create_all()
-                db.session.add(request)
-                db.session.commit()
+        # if form.account_type.data == "SA":
+        #     super_admin = SuperAdmin.query.first()
+        #     # if there is not a super admin create one
+        #     if super_admin is None:
+        #         super_admin = SuperAdmin(username=form.username.data, email=form.email.data, password=hashed_pw,state="active")
+        #         db.create_all()
+        #         db.session.add(super_admin)
+        #         db.session.commit()
+        #         flash("Your account has been created. You can log in now!", "success")
+        #         return redirect(url_for("login"))
+        #     # else send a reques to the existing super admin
+        #     else:
+        #         request = Requests(
+        #             username=form.username.data,
+        #             email=form.email.data,
+        #             password=hashed_pw,
+        #             user_type="systemuser",
+        #         )
+        #         flash("There is already a Super Admin account. Please wait so that your account be verified.",
+        #               "warning")
+        #         db.create_all()
+        #         db.session.add(request)
+        #         db.session.commit()
 
-        elif form.account_type.data == "SU":
+        if form.account_type.data == "SU":
             account_request = Requests(
                 username=form.username.data,
                 email=form.email.data,
@@ -95,27 +95,35 @@ def user_login():
         shown in a flash message.
     :return:
     """
-    if current_user.is_authenticated and current_user.state=="acitve":
+    if current_user.is_authenticated and current_user.state == "acitve":
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():
         sa = SuperAdmin.query.filter_by(email=form.email.data).first()
         su = SystemUser.query.filter_by(email=form.email.data).first()
         cu = Customer.query.filter_by(email=form.email.data).first()
+        if sa and validate_password(sa.password, form.password.data):
+            if sa.state == "active":
+                login_user(sa, remember=form.remember.data)
+                next_page = request.args.get("next")
+                return redirect(next_page) if next_page else redirect(url_for("admin.index"))
+            else:
+                flash("Your account is not active.Please contact super admin to activate your account!", "warning")
 
-        if sa and validate_password(sa.password, form.password.data) and sa.state=="active":
-            login_user(sa, remember=form.remember.data)
-            next_page = request.args.get("next")
-            return redirect(next_page) if next_page else redirect(url_for("admin.index"))
-
-        elif su and validate_password(su.password, form.password.data)and su.state=="active":
-            login_user(su, remember=form.remember.data)
-            next_page = request.args.get("next")
-            return redirect(next_page) if next_page else redirect(url_for("admin.index"))
-        elif cu and validate_password(cu.password, form.password.data)and cu.state=="active":
-            login_user(cu, remember=form.remember.data)
-            next_page = request.args.get("next")
-            return redirect(next_page) if next_page else redirect(url_for("users"))
+        elif su and validate_password(su.password, form.password.data):
+            if su.state == "active":
+                login_user(su, remember=form.remember.data)
+                next_page = request.args.get("next")
+                return redirect(next_page) if next_page else redirect(url_for("admin.index"))
+            else:
+                flash("Your account is not active.Please contact super admin to activate your account!", "warning")
+        elif cu and validate_password(cu.password, form.password.data):
+            if cu.state == "active":
+                login_user(cu, remember=form.remember.data)
+                next_page = request.args.get("next")
+                return redirect(next_page) if next_page else redirect(url_for("users"))
+            else:
+                flash("Your account is not active.Please contact admin to activate your account!", "warning")
         else:
             flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
@@ -269,9 +277,9 @@ def accept_request(id):
     user = None
     if request.user_type == "customer":
         user = Customer(username=request.username, email=request.email, password=request.password,
-                        account_number=request.account_number,state="active")
+                        account_number=request.account_number, state="active")
     elif request.user_type == "systemuser":
-        user = SystemUser(username=request.username, email=request.email, password=request.password,state=True)
+        user = SystemUser(username=request.username, email=request.email, password=request.password, state="active")
     db.session.add(user)
     db.session.delete(request)
     db.session.commit()
