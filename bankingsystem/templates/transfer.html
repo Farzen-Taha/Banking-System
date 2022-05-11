@@ -5,7 +5,7 @@
         <fieldset class="form-group">
             <legend class="border-bottom mb-4">Transfer</legend> 
             <span>Current Balance : </span>
-            <span class=" p-2 text-black">{{('{:,.2f}AFs'.format(fund))}}</span>
+            <span class=" p-2 text-black">{{('{:,.2f}AFN'.format(fund))}}</span>
             <div class="form-group">
                 <p></p>
                 {{ form.amount.label(class="form-control-label")}}
@@ -18,7 +18,11 @@
                 </div>
            
             {%else%}
-             {{form.amount(class="form-control form-control-lg")}}
+               <div class="input-group mb-3">
+                    <span class="input-group-text">AFN</span>
+                    {{form.amount(class="form-control form-control-lg")}}
+                    <span class="input-group-text">.00</span>
+                </div>
             {%endif%}
             
             </div>
@@ -34,7 +38,7 @@
                 </div>
            
             {%else%}
-             {{form.account_number(class="form-control form-control-lg")}}
+             {{form.account_number(class="form-control form-control-lg", pleceholder="Receiver's account number")}}
             {%endif%}
             
             </div>
@@ -50,7 +54,7 @@
                 </div>
            
             {%else%}
-             {{form.password(class="form-control form-control-lg")}}
+             {{form.password(class="form-control form-control-lg",placeholder='Password')}}
             {%endif%}
             
             </div>

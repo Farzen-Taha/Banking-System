@@ -40,7 +40,7 @@ class LoginForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember = BooleanField('Remember me')
-    submit = SubmitField('Login')
+    submit = SubmitField('Sign in')
 
 
 class DepositForm(FlaskForm):
@@ -57,7 +57,7 @@ class WithdrawForm(FlaskForm):
 
 class TransferForm(FlaskForm):
     amount = IntegerField("Amount", validators=[DataRequired()])
-    account_number = IntegerField("Reciever's Account Number", validators=[DataRequired()])
+    account_number = IntegerField("Recipient's account number", validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Transfer')
 

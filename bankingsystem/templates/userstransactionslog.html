@@ -4,10 +4,10 @@
     <thead class="table-info">
     <tr>
         <th>Reference Number</th>
-        <th>Sender Id</th>
-        <th>Receiver Id</th>
+        <th>From </th>
+        <th>To </th>
         <th>Amount</th>
-        <th>Transactions Type</th>
+        <th>Type</th>
         <th>Date</th>
     </tr>
     </thead>
@@ -17,7 +17,7 @@
         <td>{{transaction.reference_number}}</td>
         <td>{{transaction.sender_id}}</td>
         <td>{{transaction.receiver_id}}</td>
-        <td>{{transaction.fund_amount}}</td>
+        <td>{{('{:,.2f}AFs'.format(transaction.fund_amount))}}</td>
         <td>{{transaction.transaction_type}}</td>
         <td>{{transaction.date}}</td>
     </tr>

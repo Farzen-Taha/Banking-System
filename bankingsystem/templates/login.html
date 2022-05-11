@@ -4,12 +4,12 @@
     <form method="POST" action="">
         {{ form.hidden_tag() }}
         <fieldset class="form-group">
-            <legend class="border-bottom mb-4">Log In</legend> 
+            <legend class="border-bottom mb-4">Sign In</legend>
         
             <div class="form-group">
                 {{ form.email.label(class="form-control-label")}}
                 {% if form.email.errors %}
-                    {{ form.email(class="form-control form-control-lg is-invalid")}}
+                    {{ form.email(class="form-control form-control-lg is-invalid", placeholder="Email address")}}
                     <div class="invalid-feedback">
                         {% for error in form.email.errors%} 
                             <span>{{error}}</span>
@@ -17,14 +17,14 @@
                     </div>
             
                 {%else%}
-                    {{form.email(class="form-control form-control-lg")}}
+                    {{form.email(class="form-control ", placeholder="Email address")}}
                 {%endif%}
                 
             </div>
             <div class="form-group">
-                {{ form.password.label(class="form-control-label")}}
+                {{ form.password.label(class="form-control-label mt-2")}}
                 {% if form.password.errors %}
-                {{ form.password(class="form-control form-control-lg is-invalid")}}
+                {{ form.password(class="form-control  is-invalid", placeholder="Password")}}
                 <div class="invalid-feedback">
                     {% for error in form.password.errors%} 
                         <span>{{error}}</span>
@@ -32,13 +32,13 @@
                 </div>
            
             {%else%}
-             {{form.password(class="form-control form-control-lg")}}
+             {{form.password(class="form-control ", placeholder="Password")}}
             {%endif%}
             
             </div>
-            <div class="form-check">
-                {{form.remember(class="form-check-input")}}
-                {{form.remember.label(class="form-check-label")}}
+            <div class="form-check mt-2">
+                {{form.remember(class="form-check-input ")}}
+                {{form.remember.label(class="form-check-label ")}}
             </div>
         </fieldset>
         <div class="form-group mt-3">

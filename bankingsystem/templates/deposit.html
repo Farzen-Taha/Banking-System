@@ -19,7 +19,12 @@
                 </div>
            
             {%else%}
-             {{form.amount(class="form-control form-control-lg")}}
+                <div class="input-group mb-3">
+                    <span class="input-group-text">AFN</span>
+                    {{form.amount(class="form-control form-control-lg")}}
+                    <span class="input-group-text">.00</span>
+                </div>
+
             {%endif%}
             </div>
   

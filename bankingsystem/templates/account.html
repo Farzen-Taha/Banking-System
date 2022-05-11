@@ -15,30 +15,31 @@
                 {% endif %}
             </div>
         </div>
+
         <!-- FORM HERE -->
         <form method="POST" action="" enctype="multipart/form-data">
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Account Info</legend>
                 <div class="form-group">
-                    {{ form.username.label(class="form-control-label")}}
+                    {{ form.username.label(class="form-control-label mt-2")}}
 
                     {% if form.username.errors %}
-                    {{ form.username(class="form-control form-control-lg is-invalid")}}
+                    {{ form.username(class="form-control  is-invalid")}}
                     <div class="invalid-feedback">
                         {% for error in form.username.errors%}
                         <span>{{error}}</span>
                         {% endfor %}
                     </div>
                     {%else%}
-                    {{form.username(class="form-control form-control-lg")}}
+                    {{form.username(class="form-control ")}}
                     {%endif%}
 
                 </div>
                 <div class="form-group">
-                    {{ form.email.label(class="form-control-label")}}
+                   {{ form.email.label(class="form-control-label mt-2")}}
                     {% if form.email.errors %}
-                    {{ form.email(class="form-control form-control-lg is-invalid")}}
+                    {{ form.email(class="form-control is-invalid")}}
                     <div class="invalid-feedback">
                         {% for error in form.email.errors%}
                         <span>{{error}}</span>
@@ -46,15 +47,15 @@
                     </div>
 
                     {%else%}
-                    {{form.email(class="form-control form-control-lg")}}
+                    {{form.email(class="form-control required",required='required')}}
                     {%endif%}
 
                 </div>
 
-                <div class="form-group">
-                    {{ form.picture.label()}}
-                    <p></p>
-                    {{ form.picture(class='form-controle-file')}}
+                {{ form.picture.label(class="mt-2")}}
+                <div class="input-group">
+
+                    {{ form.picture(class='form-control')}}
                     {% if form.picture.errors%}
                     {% for error in form.picture.errors%}
                     <br><span class="text-danger">{{error}}</span></br>
@@ -63,9 +64,9 @@
                 </div>
 
                 <div class="form-group">
-                    {{ form.password.label(class="form-control-label")}}
+                    {{ form.password.label(class="form-control-label mt-2")}}
                     {% if form.password.errors %}
-                    {{ form.password(class="form-control form-control-lg is-invalid")}}
+                    {{ form.password(class="form-control  is-invalid")}}
                     <div class="invalid-feedback">
                         {% for error in form.password.errors%}
                         <span>{{error}}</span>
@@ -73,7 +74,7 @@
                     </div>
 
                     {%else%}
-                    {{form.password(class="form-control form-control-lg")}}
+                    {{form.password(class="form-control ",placeholder="Password")}}
                     {%endif%}
                 </div>
             </fieldset>
@@ -82,8 +83,8 @@
             </div>
         </form>
 
-        <div class="mt-2" >
-     <p > <a href="{{url_for('change_password')}}">Change Password</a> </p>
+        <div class="mt-2">
+            <p><a href="{{url_for('change_password')}}">Change Password</a></p>
         </div>
     </div>
 </div>
