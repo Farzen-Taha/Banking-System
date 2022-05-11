@@ -180,17 +180,26 @@ def withdraw_fund():
     """
     form = WithdrawForm()
     if request.method == "POST":
-        if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
-            user = Customer.query.filter_by(id=current_user.id).first()
-            if current_user.balance >= form.amount.data:
-                user.balance -= int(form.amount.data)
-                log_transaction(current_user.id, current_user.id, form.amount.data, "withdraw")
-                db.session.commit()
-                flash("Withdrawl was successful!", "info")
+        if validate_password(current_user.password, form.password.data):
+            if form.amount.data >= 500:
+
+                user = Customer.query.filter_by(id=current_user.id).first()
+                if current_user.balance >= form.amount.data and (
+                        current_user.balance - form.amount.data) >= 500:
+                    user.balance -= int(form.amount.data)
+                    log_transaction(current_user.id, current_user.id, form.amount.data, "withdraw")
+                    db.session.commit()
+                    flash("Withdrawal was successful!", "info")
+                else:
+                    flash("Insufficient Funds to withdraw. The remaining balance should be greater than 500AFs!",
+                          "warning")
             else:
-                flash("Insufficient Funds to withdraw", "warning")
+                flash("Insufficient Funds to withdraw. The remaining balance should be more or equal to 500AFs!",
+                      "warning")
+
         else:
-            flash("Wrong password or Amount!", "danger")
+            flash("Wrong password!", "danger")
+
     return render_template("withdraw.html", title="Withdraw", form=form, fund=show_fund())
 
 
@@ -202,20 +211,42 @@ def transfer_fund():
     """
     form = TransferForm()
     if request.method == "POST":
-        if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
-            sender_customer = Customer.query.filter_by(id=current_user.id).first()
-            receiver_customer = Customer.query.filter_by(account_number=form.account_number.data).first()
-            if (current_user.balance >= form.amount.data) and (current_user.account_number != form.account_number.data):
-                sender_customer.balance -= int(form.amount.data)
-                receiver_customer.balance += int(form.amount.data)
-                log_transaction(current_user.id, receiver_customer.id, form.amount.data, "transfer")
-                db.session.commit()
-                flash("Transfer was successful!", "info")
-                return redirect(url_for("transfer"))
+        if validate_password(current_user.password, form.password.data):
+            if form.amount.data >= 500:
+                if form.amount.data <= 500000:
+                    sender_customer = Customer.query.filter_by(id=current_user.id).first()
+                    receiver_customer = Customer.query.filter_by(account_number=form.account_number.data).first()
+                    if receiver_customer:
+                        if receiver_customer.state == "active":
+                            if current_user.balance >= form.amount.data and (
+                                    current_user.balance - form.amount.data) >= 500:
+                                if current_user.account_number != form.account_number.data:
+                                    sender_customer.balance -= int(form.amount.data)
+                                    receiver_customer.balance += int(form.amount.data)
+                                    log_transaction(current_user.id, receiver_customer.id, form.amount.data, "transfer")
+                                    db.session.commit()
+                                    flash("Transfer was successful!", "info")
+                                    return redirect(url_for("transfer"))
+                                else:
+                                    flash("Self transfer not allowed!", "warning")
+                            else:
+                                flash("Insufficient funds to transfer!", "warning")
+                        else:
+                            flash("The account with this account number is not active. Please contact with receiver!",
+                                  "warning")
+                    else:
+                        flash("Not valid account number!", "warning")
+                else:
+                    flash(
+                        "Too much fund to transfer. The fund should be more or equal to 500AFs. "
+                        "Please refer to our withdrawal policy!", "warning")
+
             else:
-                flash("Insufficient Funds to transfer or Invalid account number!", "warning")
+                flash("Not valid fund. The fund should be more than 500AFs. Please refer to our transfer policy!",
+                      "warning")
         else:
-            flash("Wrong password or Amount!", "danger")
+            flash("Wrong password!", "danger")
+
     return render_template("transfer.html", title="Transfer", form=form, fund=show_fund())
 
 
@@ -261,7 +292,7 @@ def update_account():
 
 
 def get_all_account_requests():
-    if current_user.user_type=="superadmin":
+    if current_user.user_type == "superadmin":
         requests = Requests.query.all()
     else:
         requests = Requests.query.filter_by(user_type="customer").all()
@@ -297,7 +328,13 @@ def transactionshisory():
 
 
 def users_transaction_history():
+    page = request.args.get('page', 1, type=int)
     transactions = TransactionLog.query.filter(
-        or_(TransactionLog.sender_id == current_user.id, TransactionLog.receiver_id == current_user.id))
-    # transactions = TransactionLog.query.filter_by(sender_id=current_user.id)|.filter_by(, receiver_id=current_user.id).all()
-    return render_template("userstransactionslog.html", title="transactions history", transactions=transactions)
+        or_(TransactionLog.sender_id == current_user.id, TransactionLog.receiver_id == current_user.id)).order_by(
+        TransactionLog.reference_number.desc()).paginate(page,5, False)
+    next_url = url_for('users_transactions_hist', page=transactions.next_num) \
+        if transactions.has_next else None
+    prev_url = url_for('users_transactions_hist', page=transactions.prev_num) \
+        if transactions.has_prev else None
+    return render_template("userstransactionslog.html", title="transactions history", transactions=transactions.items,
+                           next_url=next_url, prev_url=prev_url)

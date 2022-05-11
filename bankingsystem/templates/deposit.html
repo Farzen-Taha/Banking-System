@@ -5,9 +5,10 @@
         <fieldset class="form-group">
             
             <legend class="border-bottom mb-4">Deposit</legend> 
-            <p>Current Balance </p>
-            <span class="border rounded d-block p-2 text-black">{{fund}}</span>
+            <span>Current Balance : </span>
+            <span class=" p-2 text-black">{{('{:,.2f}AFs'.format(fund))}}</span>
             <div class="form-group">
+                <p></p>
                 {{ form.amount.label(class="form-control-label")}}
                 {% if form.amount.errors %}
                 {{ form.amount(class="form-control form-control-lg is-invalid")}}

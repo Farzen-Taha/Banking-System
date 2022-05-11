@@ -4,45 +4,46 @@
     <form method="POST" action="">
         <fieldset class="form-group">
             <legend class="border-bottom mb-4">Withdraw</legend>
-            <p>Current Balance </p>
-            <span class="border rounded d-block p-2 text-black">{{fund}}</span> 
+            <span>Current Balance : </span>
+            <span class=" p-2 text-black">{{('{:,.2f}AFs'.format(fund))}}</span>
             <div class="form-group">
+                <p></p>
                 {{ form.amount.label(class="form-control-label")}}
                 {% if form.amount.errors %}
                 {{ form.amount(class="form-control form-control-lg is-invalid")}}
                 <div class="invalid-feedback">
-                    {% for error in form.amount.errors%} 
-                        <span>{{error}}</span>
+                    {% for error in form.amount.errors%}
+                    <span>{{error}}</span>
                     {% endfor %}
                 </div>
-           
-            {%else%}
-             {{form.amount(class="form-control form-control-lg")}}
-            {%endif%}
-            
+
+                {%else%}
+                {{form.amount(class="form-control form-control-lg")}}
+                {%endif%}
+
             </div>
-  
+
             <div class="form-group">
                 {{ form.password.label(class="form-control-label")}}
                 {% if form.password.errors %}
                 {{ form.password(class="form-control form-control-lg is-invalid")}}
                 <div class="invalid-feedback">
-                    {% for error in form.password.errors%} 
-                        <span>{{error}}</span>
+                    {% for error in form.password.errors%}
+                    <span>{{error}}</span>
                     {% endfor %}
                 </div>
-           
-            {%else%}
-             {{form.password(class="form-control form-control-lg")}}
-            {%endif%}
-            
+
+                {%else%}
+                {{form.password(class="form-control form-control-lg")}}
+                {%endif%}
+
             </div>
 
         </fieldset>
         <div class="form-group mt-3">
             {{ form.submit(class="btn btn-outline-info") }}
-        </div>  
-    </form> 
-      
+        </div>
+    </form>
+
 </div>
 {%endblock%}
