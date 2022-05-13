@@ -1,5 +1,5 @@
 from flask import render_template, url_for, redirect
-from flask_login import login_required, logout_user
+from flask_login import login_required, logout_user, current_user
 from bankingsystem.View import (
     accept_request,
     get_all_account_requests,
@@ -11,7 +11,7 @@ from bankingsystem.View import (
     withdraw_fund,
     transfer_fund,
     transactionshisory,
-    users_transaction_history,
+    user_transaction_history,
     update_user_password
 )
 from bankingsystem import app
@@ -22,7 +22,7 @@ from bankingsystem import app
 def home():
     return render_template("home.html", title="Home")
 
-
+# TODO: Restrict this rout only to users
 @app.route("/transactions")
 @login_required
 def transactions():
@@ -39,7 +39,7 @@ def register():
     return user_register()
 
 
-@app.route("/login", methods=["POST", "GET"])
+@app.route("/login", methods=["GET", "POST"])
 def login():
     return user_login()
 
@@ -101,8 +101,8 @@ def transactionslog():
 
 @app.route("/transactions/alltransactions", methods=["POST","GET"])
 @login_required
-def users_transactions_hist():
-    return users_transaction_history()
+def user_transactions_hist():
+    return user_transaction_history()
 
 
 @app.route("/changepassword", methods=["POST","GET"])

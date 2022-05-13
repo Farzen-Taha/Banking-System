@@ -1,6 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
-<table class="table">
+<table class="table table-bordered">
     <thead class="table-info">
     <tr>
         <th>Reference Number</th>
@@ -12,7 +12,7 @@
     </tr>
     </thead>
     <tbody>
-    {%for transaction in transactions %}
+    {%for transaction in transactions.items %}
     <tr>
         <td>{{transaction.reference_number}}</td>
         <td>{{transaction.sender_id}}</td>
@@ -24,4 +24,36 @@
     {% endfor %}
     </tbody>
 </table>
+<nav aria-label="Page navigation example">
+    <ul class="pagination">
+        {% if prev_url %}
+        <li class="page-item">
+            <a class="page-link" href="{{ prev_url }}" aria-label="Previous">
+                <span aria-hidden="true">&laquo;</span>
+            </a>
+        </li>
+        {% endif %}
+        {%for page_num in transactions.iter_pages(left_edge=1, right_edge=1, right_current=2) %}
+        {% if page_num %}
+        {% if transactions.page==page_num %}
+        <li class="page-item active"><a class="page-link" href="{{url_for ('transactionslog',page=page_num)}}">{{page_num}}</a>
+        </li>
+        {%else%}
+        <li class="page-item"><a class="page-link" href="{{url_for ('transactionslog',page=page_num)}}">{{page_num}}</a>
+        </li>
+        {%endif%}
+        {% else %}
+        ...
+        {%endif%}
+        {% endfor %}
+
+        {% if next_url %}
+        <li>
+            <a class="page-link" href="{{ next_url }}" aria-label="Next">
+                <span aria-hidden="true">&raquo;</span>
+            </a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
 {% endblock %}

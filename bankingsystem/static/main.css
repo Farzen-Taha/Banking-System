@@ -72,4 +72,6 @@ body {
   .account-heading {
     font-size: 2.5rem;
   }
- 
+ .asterisk{
+   color: rgb(179, 22, 22);
+ }

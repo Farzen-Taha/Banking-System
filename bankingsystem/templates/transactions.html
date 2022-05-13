@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
+
 <article class="media content-section">
     <div class="media-body">
       <div class="article-metadata">
@@ -36,7 +37,7 @@
           <h3>Transactions log</h3>
       </div>
       <p class="article-content">See all your transactions.</p>
-      <a class="mr-2" href="{{url_for('users_transactions_hist')}}">See Transactions</a>
+      <a class="mr-2" href="{{url_for('user_transactions_hist')}}">See Transactions</a>
     </div>
   </article>
 {% endblock %}

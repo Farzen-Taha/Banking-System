@@ -95,7 +95,7 @@ def user_login():
         shown in a flash message.
     :return:
     """
-    if current_user.is_authenticated and current_user.state == "acitve":
+    if current_user.is_authenticated:
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():
@@ -323,25 +323,35 @@ def reject_request(id):
 
 
 def transactionshisory():
-    transactions = TransactionLog.query.all()
-    return render_template("admin/transactionslog.html", title="transactions history", transactions=transactions)
+    page = request.args.get('page', 1, type=int)
+
+    transactions = TransactionLog.query.order_by(
+        TransactionLog.reference_number.desc()).paginate(page, per_page= int(app.config.get('POSTS_PER_PAGE')))
+    next_url = url_for('transactionslog', page=transactions.next_num) \
+        if transactions.has_next else None
+    prev_url = url_for('transactionslog', page=transactions.prev_num) \
+        if transactions.has_prev else None
+    return render_template("admin/transactionslog.html", title="transactions history", transactions=transactions,
+                           next_url=next_url, prev_url=prev_url)
 
 
-def users_transaction_history():
+def user_transaction_history():
     page = request.args.get('page', 1, type=int)
     transactions = TransactionLog.query.filter(
         or_(TransactionLog.sender_id == current_user.id, TransactionLog.receiver_id == current_user.id)).order_by(
-        TransactionLog.reference_number.desc()).paginate(page,5, False)
-    next_url = url_for('users_transactions_hist', page=transactions.next_num) \
+        TransactionLog.reference_number.desc()).paginate(page, per_page=int(app.config.get('POSTS_PER_PAGE')))
+    next_url = url_for('user_transactions_hist', page=transactions.next_num) \
         if transactions.has_next else None
-    prev_url = url_for('users_transactions_hist', page=transactions.prev_num) \
+    prev_url = url_for('user_transactions_hist', page=transactions.prev_num) \
         if transactions.has_prev else None
-    return render_template("userstransactionslog.html", title="transactions history", transactions=transactions.items,
+    return render_template("userstransactionslog.html", title="transactions history", transactions=transactions,
                            next_url=next_url, prev_url=prev_url)
+
+
 def update_user_password():
     form = UpdatePassword()
     if form.validate_on_submit():
-        update_password_result = set_new_password(current_user.password, form.password.data,form.new_password.data)
+        update_password_result = set_new_password(current_user.password, form.password.data, form.new_password.data)
         db.session.commit()
         if update_password_result:
             flash("Your password changed. Please login with your new password!", "success")

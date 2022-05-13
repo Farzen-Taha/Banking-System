@@ -1,6 +1,7 @@
 from flask_login import current_user
 from bankingsystem import bcrypt
 from random import randint
+from bankingsystem.models import User
 
 
 def hash_user_password(password):
@@ -33,3 +34,20 @@ def set_account_number():
     account_number = randint(range_start, range_end)
     return account_number
 
+
+def check_for_username(username):
+    user = User.query.filter_by(username=username).first();
+    if user:
+        print("---------------->>>>>>",user,"---------------->>>>>")
+        return True
+    else:
+        return False
+
+
+def check_for_email(email):
+    user = User.query.filter_by(email=email).first();
+    if user:
+        print("---------------->>>>>>", user.email, "<<<<<<<----------------")
+        return True
+    else:
+        return False
