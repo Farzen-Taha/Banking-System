@@ -1,6 +1,8 @@
 import re
 from wsgiref.validate import validator
-from flask import flash, request
+from flask import flash, request, redirect, url_for
+from flask_admin.babel import gettext
+from flask_admin.contrib.sqla.view import log
 from flask_login import current_user, login_required
 from flask_admin import Admin, BaseView, expose, AdminIndexView
 from flask_admin.contrib.sqla import ModelView
@@ -20,11 +22,19 @@ class MyAdminIndexView(AdminIndexView):
         return current_user.is_authenticated and (
                 current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
 
+    def inaccessible_callback(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('home'))
+
 
 class NotificationsView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated and (
                 current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
+
+    def inaccessible_callback(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('home'))
 
     @expose("/")
     @login_required
@@ -36,6 +46,10 @@ class accountMenueLink(MenuLink):
     def is_accessible(self):
         return current_user.is_authenticated
 
+    def inaccessible_callback(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('home'))
+
 
 class LogoutMenueLink(MenuLink):
     def is_accessible(self):
@@ -46,22 +60,56 @@ class SuperAdminView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and current_user.user_type == "superadmin"
 
+    def inaccessible_callback(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('home'))
+
     form_extra_fields = {"state": SelectField(u'Change Account state',
-                                              choices=[('active', 'active'), ('deactive', 'deactive')])
+                                              choices=[('active', 'activate'), ('deactive', 'deactivate')])
                          }
     column_list = ('id', 'user_type', 'username', 'email', "state")
     form_edit_rules = ("username", "email", "state")
     form_create_rules = ("username", "email", "password")
     form_excluded_columns = ("image_file")
     column_exclude_list = ("password", "image_file")
-
+    can_export = True
     column_searchable_list = ('username',)
 
     def change_state(self, id, form):
         user = User.query.filter_by(id=id).first()
-        if (form.state.data == "deactive"):
+        if form.state.data == "deactivate":
             user.state = "active"
-            db.session.commit()
+        elif form.state.data == "activate":
+            user.state = "deactive"
+        db.session.commit()
+
+    def delete_model(self, model):
+        if model.id != current_user.id:
+            try:
+                self.on_model_delete(model)
+                self.session.flush()
+                self.session.delete(model)
+                self.session.commit()
+
+            except Exception as ex:
+                if not self.handle_view_exception(ex):
+                    flash(gettext('Failed to delete record. %(error)s', error=str(ex)), 'error')
+                    log.exception('Failed to delete record.')
+
+                self.session.rollback()
+
+                return False
+            else:
+                self.after_model_delete(model)
+        else:
+            flash("You can not delete yourself", "warning")
+
+    # def on_model_delete(self, model):
+    #     if model.id != current_user.id:
+    #         return True
+    #     else:
+    #         flash("You can not delete yourself", "warning")
+    #         return False
 
     def update_model(self, form, model):
         id = request.args.get("id")
@@ -88,7 +136,7 @@ class SuperAdminView(ModelView):
         ue = check_for_email(form.email.data)
         if not ur:
             if not ue:
-                return super(CustomerView, self).create_model(form)
+                return super(SuperAdminView, self).create_model(form)
             else:
                 flash("Emai already exits. Please enter another email!", "warning")
         else:
@@ -118,6 +166,7 @@ class SuperAdminView(ModelView):
 
 class CustomerView(ModelView):
     column_display_pk = True
+    can_export = True
     column_list = ('id', 'user_type', 'username', 'email', "balance", "state")
     form_excluded_columns = ("image_file", "user_type")
     column_exclude_list = ("password", "image_file")
@@ -133,6 +182,10 @@ class CustomerView(ModelView):
     def is_accessible(self):
         return current_user.is_authenticated and (
                 current_user.user_type == "superadmin" or current_user.user_type == "systemuser")
+
+    def inaccessible_callback(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('home'))
 
     # THis function is checks username field's  standards.
     def user_name_validation(form, field):
@@ -194,6 +247,7 @@ class CustomerView(ModelView):
 
 
 class SystemUserView(ModelView):
+    can_export = True
     column_list = ('id', 'user_type', 'username', 'email', "state")
     form_excluded_columns = ("image_file", "user_type")
     column_exclude_list = ("password", "image_file")
@@ -204,6 +258,13 @@ class SystemUserView(ModelView):
     form_extra_fields = {"state": SelectField(u'Change Account state',
                                               choices=[('active', 'active'), ('deactive', 'deactive')])
                          }
+
+    def is_accessible(self):
+        return current_user.is_authenticated and (current_user.user_type == "superadmin")
+
+    def inaccessible_callback(self, name, **kwargs):
+        if not self.is_accessible():
+            return redirect(url_for('home'))
 
     def user_name_validation(form, field):
         size = len(field.data)
@@ -225,9 +286,6 @@ class SystemUserView(ModelView):
         self.change_state(id, form)
         return super().update_model(form, model)
 
-    def is_accessible(self):
-        return current_user.is_authenticated and (current_user.user_type == "superadmin")
-
     def on_model_change(self, form, model, is_created):
         if is_created:
             model.password = set_password(form.password.data)
@@ -238,7 +296,7 @@ class SystemUserView(ModelView):
         ue = check_for_email(form.email.data)
         if not ur:
             if not ue:
-                return super(CustomerView, self).create_model(form)
+                return super(SystemUserView, self).create_model(form)
             else:
                 flash("Emai already exits. Please enter another email!", "warning")
         else:

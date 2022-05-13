@@ -14,6 +14,7 @@ from bankingsystem.View import (
     user_transaction_history,
     update_user_password
 )
+from bankingsystem.privilege import is_admin,is_customer
 from bankingsystem import app
 
 
@@ -25,6 +26,7 @@ def home():
 # TODO: Restrict this rout only to users
 @app.route("/transactions")
 @login_required
+@is_customer
 def transactions():
     return render_template("transactions.html", title="Transactions")
 
@@ -53,18 +55,21 @@ def logout():
 
 @app.route("/deposit", methods=["POST", "GET"])
 @login_required
+@is_customer
 def deposit():
     return deposit_fund()
 
 
 @app.route("/withdraw", methods=["POST", "GET"])
 @login_required
+@is_customer
 def withdraw():
     return withdraw_fund()
 
 
 @app.route("/transfer", methods=["POST", "GET"])
 @login_required
+@is_customer
 def transfer():
     return transfer_fund()
 
