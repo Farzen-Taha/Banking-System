@@ -2,7 +2,10 @@
 * {
   box-sizing: border-box;
 }
-
+.container{
+  margin: orem;
+  padding: 0rem;
+  }
 .page-contain {
   display: flex;
   min-height: 100vh;

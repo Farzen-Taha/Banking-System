@@ -1,8 +1,9 @@
 {% extends "layout.html" %}
 {% block content %}
-
+<h1>Number of requests: {{request_size}}</h1>
 <div class="container">
     <div class="row row-cols-5 ">
+        {% if request%}
         {%for request in requests%}
         <div class="col">
             <div class="card">
@@ -19,6 +20,9 @@
             </div>
         </div>
         {%endfor%}
+        {%else%}
+        <h1>No request</h1>
+        {%endif%}
     </div>
 </div>
 {% endblock content %}

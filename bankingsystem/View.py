@@ -1,4 +1,4 @@
-from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests, TransactionLog
+from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests, TransactionLog, User
 from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_user, current_user
 from sqlalchemy import or_
@@ -99,31 +99,51 @@ def user_login():
         return redirect(url_for("home"))
     form = LoginForm()
     if form.validate_on_submit():
-        sa = SuperAdmin.query.filter_by(email=form.email.data).first()
-        su = SystemUser.query.filter_by(email=form.email.data).first()
-        cu = Customer.query.filter_by(email=form.email.data).first()
-        if sa and validate_password(sa.password, form.password.data):
-            if sa.state == "active":
-                login_user(sa, remember=form.remember.data)
+        # sa = SuperAdmin.query.filter_by(email=form.email.data).first()
+        # su = SystemUser.query.filter_by(email=form.email.data).first()
+        # cu = Customer.query.filter_by(email=form.email.data).first()
+        user = User.query.filter_by(email=form.email.data).first()
+        user_request = Requests.query.filter_by(email=form.email.data).first()
+        # if sa and validate_password(sa.password, form.password.data):
+        #     if sa.state == "active":
+        #         login_user(sa, remember=form.remember.data)
+        #         next_page = request.args.get("next")
+        #         return redirect(next_page) if next_page else redirect(url_for("admin.index"))
+        #     else:
+        #         flash("Your account is not active.Please contact super admin to activate your account!", "warning")
+        if user_request:
+            flash("Your account is not active.Please contact super admin to activate your account!", "warning")
+        elif user and (user.user_type == "superadmin" or user.user_type == "systemuser") and validate_password(
+                user.password, form.password.data):
+            if user.state == "active":
+                login_user(user, remember=form.remember.data)
                 next_page = request.args.get("next")
                 return redirect(next_page) if next_page else redirect(url_for("admin.index"))
             else:
                 flash("Your account is not active.Please contact super admin to activate your account!", "warning")
+        # elif su and validate_password(su.password, form.password.data):
+        #     if su.state == "active":
+        #         login_user(su, remember=form.remember.data)
+        #         next_page = request.args.get("next")
+        #         return redirect(next_page) if next_page else redirect(url_for("admin.index"))
+        #     else:
+        #         flash("Your account is not active.Please contact super admin to activate your account!", "warning")
+        # elif cu and validate_password(cu.password, form.password.data):
+        #     if cu.state == "active":
+        #         login_user(cu, remember=form.remember.data)
+        #         next_page = request.args.get("next")
+        #         return redirect(next_page) if next_page else redirect(url_for("users"))
+        #     else:
+        #         flash("Your account is not active.Please contact admin to activate your account!", "warning")
 
-        elif su and validate_password(su.password, form.password.data):
-            if su.state == "active":
-                login_user(su, remember=form.remember.data)
+        elif user and (user.user_type == "customer") and validate_password(
+                user.password, form.password.data):
+            if user.state == "active":
+                login_user(user, remember=form.remember.data)
                 next_page = request.args.get("next")
-                return redirect(next_page) if next_page else redirect(url_for("admin.index"))
+                return redirect(next_page) if next_page else redirect(url_for("home"))
             else:
                 flash("Your account is not active.Please contact super admin to activate your account!", "warning")
-        elif cu and validate_password(cu.password, form.password.data):
-            if cu.state == "active":
-                login_user(cu, remember=form.remember.data)
-                next_page = request.args.get("next")
-                return redirect(next_page) if next_page else redirect(url_for("users"))
-            else:
-                flash("Your account is not active.Please contact admin to activate your account!", "warning")
         else:
             flash("Login unsuccessful, incorrect email or password", "danger")
     return render_template("login.html", title="Login", form=form)
@@ -296,7 +316,7 @@ def get_all_account_requests():
         requests = Requests.query.all()
     else:
         requests = Requests.query.filter_by(user_type="customer").all()
-    return render_template("admin/account_request.html", title="Request", requests=requests)
+    return render_template("admin/account_request.html", title="Request", requests=requests, request_size=len(requests))
 
 
 def accept_request(id):
@@ -326,7 +346,7 @@ def transactionshisory():
     page = request.args.get('page', 1, type=int)
 
     transactions = TransactionLog.query.order_by(
-        TransactionLog.reference_number.desc()).paginate(page, per_page= int(app.config.get('POSTS_PER_PAGE')))
+        TransactionLog.reference_number.desc()).paginate(page, per_page=int(app.config.get('POSTS_PER_PAGE')))
     next_url = url_for('transactionslog', page=transactions.next_num) \
         if transactions.has_next else None
     prev_url = url_for('transactionslog', page=transactions.prev_num) \

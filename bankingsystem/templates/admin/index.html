@@ -1,29 +1,87 @@
 {% extends 'admin/master.html' %}
+{%block head_css%}
+{{super()}}
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='admin.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ionicons/2.0.1/css/ionicons.min.css">
+<link rel="stylesheet" href="assets/css/style.css">
+{%endblock head_css%}
 {% block body %}
 
-<section class="page-contain">
-  <a href="#" class="data-card">
-    <h3>270</h3>
-    <h4>Care Facilities</h4>
-    <p>Aenean lacinia bibendum nulla sed consectetur.</p>
-    <span class="link-text">
-      View All Providers
-      <svg width="25" height="16" viewBox="0 0 25 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M17.8631 0.929124L24.2271 7.29308C24.6176 7.68361 24.6176 8.31677 24.2271 8.7073L17.8631 15.0713C17.4726 15.4618 16.8394 15.4618 16.4489 15.0713C16.0584 14.6807 16.0584 14.0476 16.4489 13.657L21.1058 9.00019H0.47998V7.00019H21.1058L16.4489 2.34334C16.0584 1.95281 16.0584 1.31965 16.4489 0.929124C16.8394 0.538599 17.4726 0.538599 17.8631 0.929124Z" fill="#753BBD"/>
-</svg>
-    </span>
-  </a>
-  <a href="#" class="data-card">
-    <h3>12,000</h3>
-    <h4>Employees</h4>
-    <p>Etiam porta sem malesuada.</p>
-    <span class="link-text">
-      View Information
-      <svg width="25" height="16" viewBox="0 0 25 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path fill-rule="evenodd" clip-rule="evenodd" d="M17.8631 0.929124L24.2271 7.29308C24.6176 7.68361 24.6176 8.31677 24.2271 8.7073L17.8631 15.0713C17.4726 15.4618 16.8394 15.4618 16.4489 15.0713C16.0584 14.6807 16.0584 14.0476 16.4489 13.657L21.1058 9.00019H0.47998V7.00019H21.1058L16.4489 2.34334C16.0584 1.95281 16.0584 1.31965 16.4489 0.929124C16.8394 0.538599 17.4726 0.538599 17.8631 0.929124Z" fill="#753BBD"/>
-</svg>
-    </span>
-  </a>
-</section>
+<div class="row">
+  <div class="col-md-4">
+      <div class="card mb-4 box-shadow">
+          <img class="card-img-top" text=Thumbnail" alt="Thumbnail [100%x225]"
+              style="height: 225px; width: 100%; display: block;" src="../static/static_pic/bank.jpg"
+              data-holder-rendered="true">
+          <div class="card-body">
+              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                  additional content. This content is a little bit longer.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+
+                  </div>
+                  <small class="text-muted">9 mins</small>
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="col-md-4">
+      <div class="card mb-4 box-shadow">
+          <img class="card-img-top" alt="Thumbnail [100%x225]" src="../static/static_pic/hotel.jpg"
+              data-holder-rendered="true" style="height: 225px; width: 100%; display: block;">
+          <div class="card-body">
+              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                  additional content. This content is a little bit longer.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+                  </div>
+                  <small class="text-muted">9 mins</small>
+              </div>
+          </div>
+      </div>
+  </div>
+  <div class="col-md-4">
+      <div class="card mb-4 box-shadow">
+          <img class="card-img-top"
+              data-src="holder.js/100px225?theme=thumb&amp;bg=55595c&amp;fg=eceeef&amp;text=Thumbnail"
+              alt="Thumbnail [100%x225]" src="../static/static_pic/bank.jpg" data-holder-rendered="true"
+              style="height: 225px; width: 100%; display: block;">
+          <div class="card-body">
+              <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                  additional content. This content is a little bit longer.</p>
+              <div class="d-flex justify-content-between align-items-center">
+                  <div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-outline-secondary">View</button>
+
+                  </div>
+                  <small class="text-muted">9 mins</small>
+              </div>
+          </div>
+      </div>
+  </div>
 {% endblock body%}
+
+{% block tail%}
+<div class="footer-basic">
+  <footer>
+    <div class="social"><a href="https://www.instagram.com/accounts/login/?"><i class="icon ion-social-instagram"></i></a>
+      <a href="https://accounts.snapchat.com/accounts/login?continue=%2Faccounts%2Fwelcome"><i class="icon ion-social-snapchat"></i></a>
+      <a href="https://twitter.com/i/flow/login"><i class="icon ion-social-twitter"></i></a>
+      <a href="https://www.facebook.com/"><i class="icon ion-social-facebook"></i></a>
+    </div>
+    <ul class="list-inline">
+      <li class="list-inline-item"><a href="#">Home</a></li>
+      <li class="list-inline-item"><a href="#">Services</a></li>
+      <li class="list-inline-item"><a href="#">About</a></li>
+      <li class="list-inline-item"><a href="#">Terms</a></li>
+      <li class="list-inline-item"><a href="#">Privacy Policy</a></li>
+    </ul>
+    <p class="copyright">Banking System© 2022</p>
+  </footer>
+
+</footer>
+</div>
+{%endblock tail%}
 
