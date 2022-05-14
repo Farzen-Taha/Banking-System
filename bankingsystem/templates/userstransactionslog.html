@@ -1,5 +1,6 @@
 {% extends "layout.html" %}
 {% block content %}
+
 <table class="table table-bordered table-light">
     <thead class="table-secondary">
     <tr>
@@ -11,6 +12,7 @@
         <th>Date</th>
     </tr>
     </thead>
+    <!-- Retriving the log -->
     <tbody>
     {%for transaction in transactions.items %}
     <tr>
@@ -25,6 +27,7 @@
     {% endfor %}
 </table>
 
+    <!-- Pagination -->
 <nav aria-label="Page navigation example">
     <ul class="pagination">
         {% if prev_url %}

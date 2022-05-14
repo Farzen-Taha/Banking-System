@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime 
 from bankingsystem import db, login_manager
 from flask_login import UserMixin
 
@@ -79,10 +79,10 @@ class Requests(db.Model):
 
 
 class TransactionLog(db.Model):
-    __tablename__ = 'transferlog'
+    __tablename__ = 'transactionlog'
     reference_number = db.Column("reference_number", db.Integer, primary_key=True)
     sender_id = db.Column("sender_id", db.Integer)
     receiver_id = db.Column("receiver_id", db.Integer)
     fund_amount = db.Column("amount", db.Integer)
     transaction_type = db.Column(db.String(60), nullable=False)
-    date = db.Column(db.DateTime, nullable=False, default=datetime.datetime.utcnow())
+    date = db.Column(db.String(60), nullable=False, default=datetime.now())

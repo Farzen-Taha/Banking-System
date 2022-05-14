@@ -73,7 +73,7 @@ class SuperAdminView(ModelView):
     form_excluded_columns = ("image_file")
     column_exclude_list = ("password", "image_file")
     can_export = True
-    column_searchable_list = ('username',)
+    column_searchable_list = ('username',"id")
 
     def change_state(self, id, form):
         user = User.query.filter_by(id=id).first()
@@ -167,15 +167,15 @@ class SuperAdminView(ModelView):
 class CustomerView(ModelView):
     column_display_pk = True
     can_export = True
-    column_list = ('id', 'user_type', 'username', 'email', "balance", "state")
+    column_list = ('id', 'user_type', 'username', 'email', "balance", "state","account_number")
     form_excluded_columns = ("image_file", "user_type")
     column_exclude_list = ("password", "image_file")
-    column_searchable_list = ('username',)
+    column_searchable_list = ('username',"id","account_number")
     form_edit_rules = ("username", "email", "state")
     form_create_rules = ("username", "email", "password")
 
     form_extra_fields = {"state": SelectField(u'Change Account state',
-                                              choices=[('active', 'active'), ('deactive', 'deactive')])
+                                              choices=[('active', 'activate'), ('deactive', 'deactivate')])
                          }
 
     # THis function makes this tab visible to admin and systemuser.
@@ -251,12 +251,12 @@ class SystemUserView(ModelView):
     column_list = ('id', 'user_type', 'username', 'email', "state")
     form_excluded_columns = ("image_file", "user_type")
     column_exclude_list = ("password", "image_file")
-    column_searchable_list = ('username',)
+    column_searchable_list = ('username',"id")
     form_edit_rules = ("username", "email", "state")
     form_create_rules = ("username", "email", "password")
 
     form_extra_fields = {"state": SelectField(u'Change Account state',
-                                              choices=[('active', 'active'), ('deactive', 'deactive')])
+                                              choices=[('active', 'activate'), ('deactive', 'deactivate')])
                          }
 
     def is_accessible(self):

@@ -28,9 +28,9 @@ def set_new_password(current_password, entered_password, new_password):
 
 
 def set_account_number():
-    n = 10
-    range_start = 10 ** (n - 1)
-    range_end = (10 ** n) - 1
+    n = 13
+    range_start = 13 ** (n - 1)
+    range_end = (13 ** n) - 1
     account_number = randint(range_start, range_end)
     return account_number
 

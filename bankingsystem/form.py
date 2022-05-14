@@ -9,7 +9,7 @@ from flask_wtf.file import FileField, FileAllowed
 
 
 class RegistrationForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20),
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=20),
                                                    Regexp('^\w+$',
                                                           message='Username must contain only letters numbers or underscore')])
     email = StringField('Email', validators=[DataRequired(), Email()])

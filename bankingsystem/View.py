@@ -1,3 +1,4 @@
+from datetime import datetime
 from bankingsystem.models import SuperAdmin, SystemUser, Customer, Requests, TransactionLog, User
 from flask import render_template, url_for, redirect, flash, request
 from flask_login import login_user, current_user
@@ -149,7 +150,7 @@ def user_login():
     return render_template("login.html", title="Login", form=form)
 
 
-def log_transaction(sender_id, receiver_id, amount, type):
+def log_transaction(sender_id, receiver_id, amount, type,date):
     """
      This function saves the customers' transaction history.
     :param sender_id: id of the customer who wants to send fund.
@@ -158,7 +159,7 @@ def log_transaction(sender_id, receiver_id, amount, type):
     :param type: type of the transaction.
     :return:
     """
-    log = TransactionLog(sender_id=sender_id, receiver_id=receiver_id, fund_amount=amount, transaction_type=type)
+    log = TransactionLog(sender_id=sender_id, receiver_id=receiver_id, fund_amount=amount, transaction_type=type,date=date)
     db.session.add(log)
     db.session.commit()
 
@@ -184,7 +185,8 @@ def deposit_fund():
         if validate_password(current_user.password, form.password.data) and form.amount.data > 0:
             user = Customer.query.filter_by(id=current_user.id).first()
             user.balance = user.balance + int(form.amount.data)
-            log_transaction(current_user.id, current_user.id, form.amount.data, "deposit")
+            tran_date = datetime.now().strftime("%b-%d-%Y %H:%M:%S %p")
+            log_transaction(current_user.id, current_user.id, form.amount.data, "deposit",tran_date)
             db.session.commit()
             flash("Deposit was successful!", "info")
         else:
@@ -207,7 +209,8 @@ def withdraw_fund():
                 if current_user.balance >= form.amount.data and (
                         current_user.balance - form.amount.data) >= 500:
                     user.balance -= int(form.amount.data)
-                    log_transaction(current_user.id, current_user.id, form.amount.data, "withdraw")
+                    tran_date = datetime.now().strftime("%b-%d-%Y %H:%M:%S %p")
+                    log_transaction(current_user.id, current_user.id, form.amount.data, "withdraw",tran_date)
                     db.session.commit()
                     flash("Withdrawal was successful!", "info")
                 else:
@@ -243,7 +246,8 @@ def transfer_fund():
                                 if current_user.account_number != form.account_number.data:
                                     sender_customer.balance -= int(form.amount.data)
                                     receiver_customer.balance += int(form.amount.data)
-                                    log_transaction(current_user.id, receiver_customer.id, form.amount.data, "transfer")
+                                    tran_date = datetime.now().strftime("%b-%d-%Y %H:%M:%S %p")
+                                    log_transaction(current_user.id, receiver_customer.id, form.amount.data, "transfer",tran_date)
                                     db.session.commit()
                                     flash("Transfer was successful!", "info")
                                     return redirect(url_for("transfer"))
